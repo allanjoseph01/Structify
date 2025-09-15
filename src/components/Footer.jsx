@@ -1,4 +1,5 @@
 import React from 'react'
+import { Link } from 'react-router-dom'
 
 const Footer = () => {
   return (
@@ -10,7 +11,7 @@ const Footer = () => {
       <div className='w-full text-center text-gray-500'>Making data structures accessible through interactive visualization and real code</div>
       <div className='flex justify-center gap-5'>
         <div>
-          <a href="" className='text-gray-500 hover:text-[#1181a9]'>About</a>
+          <Link to="/about" className='text-gray-500 hover:text-[#1181a9]'>About</Link>
         </div>
         <div>
           <a href="" className='text-gray-500 hover:text-[#1181a9]'>Data Structures</a>
@@ -19,7 +20,7 @@ const Footer = () => {
           <a href="" className='text-gray-500 hover:text-[#1181a9]'>Structify AI</a>
         </div>
         <div>
-          <a href="" className='text-gray-500 hover:text-[#1181a9]'>Contact</a>
+          <Link to="/contact" className='text-gray-500 hover:text-[#1181a9]'>Contact</Link>
         </div>
       </div>
     </div>

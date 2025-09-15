@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -7,19 +8,19 @@ const Navbar = () => {
     <nav className="h-16 flex justify-between items-center px-6 border-b border-gray-800 sticky top-0 z-50 
   backdrop-blur-md bg-[#030A17]/70">
       {/* Logo */}
-      <div id="Logo" className="font-bold text-white flex items-center text-xl gap-1">
+      <Link to="/" id="Logo" className="font-bold text-white flex items-center text-xl gap-1 cursor-pointer">
         <div>
           <span className="bi bi-chevron-left text-[#45CFFF]"></span>
           <span className="bi bi-chevron-right text-[#45CFFF]"></span>
         </div>
         Structify
-      </div>
+      </Link>
 
       {/* Desktop Menu */}
       <div className="hidden md:flex items-center space-x-8">
-        <a href="#/features" className="text-gray-500 hover:text-[#45CFFF] transition-colors">
+        <Link to="/features" className="text-gray-500 hover:text-[#45CFFF] transition-colors">
           Features
-        </a>
+        </Link>
         <a href="#structures" className="text-gray-500 hover:text-[#45CFFF] transition-colors">
           Data Structures
         </a>
@@ -30,9 +31,9 @@ const Navbar = () => {
 
       {/* Documentation Button */}
       <div id="documentation" className="hidden md:block">
-        <button className="border border-gray-400 px-4 py-2 rounded-lg text-gray-200 text-base flex items-center gap-2 hover:bg-[#3ED0FF] hover:text-black transition-colors hover:border-blue-500 cursor-pointer font-semibold">
+        <Link className="border border-gray-400 px-4 py-2 rounded-lg text-gray-200 text-base flex items-center gap-2 hover:bg-[#3ED0FF] hover:text-black transition-colors hover:border-blue-500 cursor-pointer font-semibold" to="/documentation">
           <span className="bi bi-book"></span> Documentation
-        </button>
+        </Link>
       </div>
 
       {/* Mobile Menu Button */}

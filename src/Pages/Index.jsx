@@ -1,7 +1,7 @@
 import React from 'react'
 import Navbar from '../components/Navbar'
 import PillButton from '../components/ui/PillButton'
-import FeatureCard from '../components/ui/FeatureCard'
+import StepCard from '../components/ui/StepCard'
 import FeatureBox from '../components/ui/FeatureBox'
 import Footer from '../components/Footer'
 import DataStructureCard from '../components/ui/DataStructureCard'
@@ -9,7 +9,7 @@ import ChatCard from '../components/ChatCard'
 
 const Index = () => {
   return (
-    <>
+    <div style={{backgroundColor:"#0A1018" , height:"100%"}}>
       <Navbar />
       <div className='min-h-[500px] flex flex-col px-4' id='first-page'>
         {/* Pill Button */}
@@ -69,9 +69,9 @@ const Index = () => {
         </div>
         <div className='mt-5 flex gap-10 h-[350px] justify-center w-full'>
           <div className='flex flex-col gap-5 h-full' style={{justifyContent:"center"}}>
-            <FeatureCard icon="bi bi-eye" title="See It" description="Visual animations make complex algorithms crystal clear" step={1} />
-            <FeatureCard icon="bi bi-lightbulb" title="Understand It" description="Interactive elements help you grasp the underlying logic" step={2} />
-            <FeatureCard icon="bi bi-graph-up-arrow" title="Master It" description="Practice with real examples and AI guidance" step={3} />
+            <StepCard icon="bi bi-eye" title="See It" description="Visual animations make complex algorithms crystal clear" step={1} />
+            <StepCard icon="bi bi-lightbulb" title="Understand It" description="Interactive elements help you grasp the underlying logic" step={2} />
+            <StepCard icon="bi bi-graph-up-arrow" title="Master It" description="Practice with real examples and AI guidance" step={3} />
           </div>
           <div className='h-full flex flex-col gap-20' style={{justifyContent:"center"}}>
             <div className='flex gap-10'>
@@ -206,7 +206,7 @@ const Index = () => {
         </div>
       </div>
       <Footer />
-    </>
+    </div>
   )
 }
 

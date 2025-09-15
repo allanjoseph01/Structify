@@ -1,4 +1,5 @@
 import React from 'react'
+import { Link } from 'react-router-dom';
 
 const DataStructureCard = ({ icon, title, complexity, description, dataStructure }) => {
   return (
@@ -20,11 +21,12 @@ const DataStructureCard = ({ icon, title, complexity, description, dataStructure
       {/* Title and Description */}
       <h2 className="text-2xl font-semibold text-white mb-2 transition-colors duration-300 group-hover:text-[#00D4FF]">{title}</h2>
       <p className="text-sm text-gray-400 mb-6">{description}</p>
-
-      {/* Visualise Button */}
-      <button className="w-full py-3 px-6 rounded-xl text-lg font-semibold text-white bg-[#020817] group-hover:bg-[#00cdd4] transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-[#0052F2] focus:ring-offset-2 focus:ring-offset-[#0E1420] group-hover:text-black cursor-pointer">
-        Visualize {dataStructure}
-      </button>
+      
+      <Link to={`/visualization/${dataStructure.replace(/\s+/g, "")}`}>
+        <button className="w-full py-3 px-6 rounded-xl text-lg font-semibold text-white bg-[#020817] group-hover:bg-[#00cdd4] transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-[#0052F2] focus:ring-offset-2 focus:ring-offset-[#0E1420] group-hover:text-black cursor-pointer">
+          Visualize {dataStructure}
+        </button>
+      </Link>
     </div>
   );
 };

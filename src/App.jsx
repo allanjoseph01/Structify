@@ -1,14 +1,29 @@
-import { useState } from 'react'
-import './App.css'
-import Index from './Pages/Index'
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Index from './Pages/Index';
+import Features from './Pages/Features';
+import Documentation from './Pages/Documentation';
+import About from './Pages/About';
+import Contact from './Pages/Contact';
+import NotFound from './Pages/NotFound';
+import StackVisualizer from "./Pages/StackVisualizer";
+import QueueVisualizer from "./Pages/QueueVisualizer";
 
-function App() {
-  const [count, setCount] = useState(0)
-  return(
-    <div style={{backgroundColor:"#0A1018" , height:"100%"}}>
-      <Index />
-    </div>
-  )
-}
+const App = () => {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<Index />} />
+        <Route path="/features" element={<Features />} />
+        <Route path="/documentation" element={<Documentation />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/visualization/stack" element={<StackVisualizer />} />
+        <Route path="/visualization/Queue" element={<QueueVisualizer />} />
+        {/* fallback for invalid routes */}
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </Router>
+  );
+};
 
-export default App
+export default App;
