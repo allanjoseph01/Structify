@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import { HashLink } from 'react-router-hash-link';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -21,12 +22,12 @@ const Navbar = () => {
         <Link to="/features" className="text-gray-500 hover:text-[#45CFFF] transition-colors">
           Features
         </Link>
-        <a href="#structures" className="text-gray-500 hover:text-[#45CFFF] transition-colors">
+        <HashLink smooth to="/#DataStructure" className="text-gray-500 hover:text-[#45CFFF] transition-colors">
           Data Structures
-        </a>
-        <a href="#ai" className="text-gray-500 hover:text-[#45CFFF] transition-colors">
+        </HashLink>
+        <HashLink smooth to="/#ai" className="text-gray-500 hover:text-[#45CFFF] transition-colors">
           Structify AI
-        </a>
+        </HashLink>
       </div>
 
       {/* Documentation Button */}

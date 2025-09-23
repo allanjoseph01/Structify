@@ -7,6 +7,7 @@ import Contact from './Pages/Contact';
 import NotFound from './Pages/NotFound';
 import StackVisualizer from "./Pages/StackVisualizer";
 import QueueVisualizer from "./Pages/QueueVisualizer";
+import LinkedListVisualizer from "./Pages/LinkedListVisualizer";
 
 const App = () => {
   return (
@@ -19,6 +20,7 @@ const App = () => {
         <Route path="/contact" element={<Contact />} />
         <Route path="/visualization/stack" element={<StackVisualizer />} />
         <Route path="/visualization/Queue" element={<QueueVisualizer />} />
+        <Route path="/visualization/SinglyLinkedList" element={<LinkedListVisualizer />} />
         {/* fallback for invalid routes */}
         <Route path="*" element={<NotFound />} />
       </Routes>

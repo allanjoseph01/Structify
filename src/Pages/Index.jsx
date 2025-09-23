@@ -6,6 +6,7 @@ import FeatureBox from '../components/ui/FeatureBox'
 import Footer from '../components/Footer'
 import DataStructureCard from '../components/ui/DataStructureCard'
 import ChatCard from '../components/ChatCard'
+import { Link } from 'react-router-dom'
 
 const Index = () => {
   return (
@@ -50,9 +51,11 @@ const Index = () => {
           </button>
 
           {/* Learn More Button */}
-          <button className="border border-gray-400 px-6 py-2 rounded-lg text-gray-200 text-lg flex items-center gap-2 hover:bg-[#3ED0FF] hover:text-black transition-all hover:border-blue-500 cursor-pointer font-semibold hover:scale-105">
-            <span className="bi bi-book text-xl"></span> Learn More
-          </button>
+          <Link to="/documentation">
+            <button className="border border-gray-400 px-6 py-2 rounded-lg text-gray-200 text-lg flex items-center gap-2 hover:bg-[#3ED0FF] hover:text-black transition-all hover:border-blue-500 cursor-pointer font-semibold hover:scale-105">
+              <span className="bi bi-book text-xl"></span> Learn More
+            </button>
+          </Link>
         </div>
       </div>
       <div id="why-visualizing" className='min-h-[500px] flex flex-col'>
@@ -87,7 +90,7 @@ const Index = () => {
           </div>
         </div>
       </div>
-      <div className='min-h-[500px] mt-20'>
+      <div className='min-h-[500px] mt-20' id='ai'>
         <div className='w-full flex justify-center sm:mt-11'>
           <PillButton icon="bi bi-robot" text="AI-Powered Learning" />
         </div>
@@ -119,7 +122,7 @@ const Index = () => {
           </div>
         </div>
       </div>
-      <div className='mt-24'>
+      <div className='mt-24' id="DataStructure">
         <div className='text-white text-4xl font-bold w-full flex justify-center mt-6'>
           Choose Your Data Structure
         </div>
