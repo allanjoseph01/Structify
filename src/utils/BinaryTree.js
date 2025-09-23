@@ -29,53 +29,33 @@ class BinaryTree {
         let targetNode = null;
         let deepestNode = null;
         let deepestParent = null;
-        const q = [this.root];
-        
-        while(q.length > 0) {
-            const node = q.shift();
-            deepestNode = node;
+        const q = [{node: this.root, parent: null}];
+
+        let head = 0;
+        while(head < q.length) {
+            const {node, parent} = q[head++];
             
+            deepestNode = node;
+            deepestParent = parent;
+
             if (node.value === value) {
                 targetNode = node;
             }
 
             if (node.left) {
-                if (node.left.left || node.left.right) {
-                    deepestParent = node;
-                }
-                q.push(node.left);
+                q.push({node: node.left, parent: node});
             }
             if (node.right) {
-                if (node.right.left || node.right.right) {
-                    deepestParent = node;
-                }
-                q.push(node.right);
+                q.push({node: node.right, parent: node});
             }
         }
-
-        // Special case: if deepestParent is null, it means the deepest node is the root or a child of the root.
-        // We need to find the actual parent. This is a simple BFS traversal.
-        if (deepestParent === null && deepestNode !== this.root) {
-            const q2 = [this.root];
-            while (q2.length > 0) {
-                const node = q2.shift();
-                if (node.left === deepestNode || node.right === deepestNode) {
-                    deepestParent = node;
-                    break;
-                }
-                if (node.left) q2.push(node.left);
-                if (node.right) q2.push(node.right);
-            }
-        }
-
-
+        
         return { target: targetNode, deepest: deepestNode, deepestParent: deepestParent };
     }
 
     delete(value) {
         if (!this.root) return false;
 
-        // Handle root deletion as a special case
         if (this.root.value === value && !this.root.left && !this.root.right) {
             this.root = null;
             return true;
@@ -85,18 +65,16 @@ class BinaryTree {
 
         if (target) {
             if (target === deepest) {
-                if (deepestParent.left === deepest) deepestParent.left = null;
-                else deepestParent.right = null;
+                if (deepestParent) {
+                    if (deepestParent.left === deepest) deepestParent.left = null;
+                    else deepestParent.right = null;
+                }
                 return true;
             }
             target.value = deepest.value;
             if (deepestParent) {
                 if (deepestParent.left === deepest) deepestParent.left = null;
                 else deepestParent.right = null;
-            } else {
-                // If the deepest parent is null, the deepest node must be a child of the root.
-                if (this.root.left === deepest) this.root.left = null;
-                else if (this.root.right === deepest) this.root.right = null;
             }
             return true;
         }
@@ -106,11 +84,6 @@ class BinaryTree {
 
 export const binaryTree = new BinaryTree();
 
-/**
- * A utility function to animate a visual node.
- * @param {HTMLElement} visualNode 
- * @param {object} tl - GSAP timeline
- */
 const animateNode = (visualNode, tl) => {
     tl.to(visualNode, { duration: 0.5, scale: 1.3, ease: 'power1.inOut' });
     tl.to(visualNode, { duration: 0.25, scale: 1, ease: 'power1.inOut' }, '>-0.15');
@@ -126,7 +99,7 @@ function renderTree(btVisArea, root = binaryTree.root) {
     if (!root) {
         const placeholderText = document.createElement('p');
         placeholderText.classList.add('text-gray-400', 'italic', 'text-base');
-        placeholderText.textContent = 'Your Binary Tree will appear here 👇';
+        placeholderText.textContent = '';
         btVisArea.appendChild(placeholderText);
         return;
     }
@@ -181,12 +154,15 @@ function renderTree(btVisArea, root = binaryTree.root) {
     positions.forEach(p => {
         if (!p.parent) return;
         const startX = p.parent.x;
-        const startY = p.parent.y + nodeSize / 2;
+        const startY = p.parent.y + nodeSize;
         const endX = p.x;
-        const endY = p.y + nodeSize / 2;
+        const endY = p.y;
+
+        const ctrlX = (startX + endX) / 2;
+        const ctrlY = (startY + endY) / 2 - 20;
 
         const path = document.createElementNS(svgNS, "path");
-        path.setAttribute("d", `M ${startX} ${startY} L ${endX} ${endY}`);
+        path.setAttribute("d", `M ${startX} ${startY} Q ${ctrlX} ${ctrlY} ${endX} ${endY}`);
         path.setAttribute("stroke", "#00D3F3");
         path.setAttribute("stroke-width", "2");
         path.setAttribute("fill", "none");
@@ -217,27 +193,59 @@ export async function handleInsert(btVisArea, value, setHistoryList, hisnum, dis
     const nodeSize = 50;
     const levelGap = 100;
     const minGap = 50;
-    const tl = gsap.timeline({ paused: true });
+    const tl = gsap.timeline();
 
     if (!binaryTree.root) {
         binaryTree.insert(numValue);
         renderTree(btVisArea);
         const rootEl = btVisArea.querySelector('.bt-node');
-        gsap.from(rootEl, {
-            duration: 0.8,
-            y: -150,
-            scale: 0,
-            opacity: 0,
-            ease: 'back.out(1.7)'
-        });
+        if (rootEl) {
+            gsap.from(rootEl, {
+                duration: 0.8,
+                y: -150,
+                scale: 0,
+                opacity: 0,
+                ease: 'back.out(1.7)'
+            });
+        }
         setHistoryList(prev => [...prev, { id: hisnum, text: `Inserted value ${numValue} into the tree.` }]);
         return;
     }
 
+    // Capture current state for animation path
+    const originalPositions = [];
+    const positionsToAnimate = {};
+    function computeWidths(node) {
+        if (!node) return 0;
+        const lw = computeWidths(node.left);
+        const rw = computeWidths(node.right);
+        node.subtreeWidth = (!node.left && !node.right)
+            ? nodeSize
+            : lw + minGap + rw;
+        return node.subtreeWidth;
+    }
+    computeWidths(binaryTree.root);
+
+    function assign(node, x, y) {
+        if (!node) return;
+        const lw = node.left ? node.left.subtreeWidth : 0;
+        const rw = node.right ? node.right.subtreeWidth : 0;
+        originalPositions.push({ node, x, y });
+        if (node.left) {
+            const lx = x - (rw + minGap) / 2;
+            assign(node.left, lx, y + levelGap);
+        }
+        if (node.right) {
+            const rx = x + (lw + minGap) / 2;
+            assign(node.right, rx, y + levelGap);
+        }
+    }
+    assign(binaryTree.root, btVisArea.clientWidth / 2, 50);
+
+    // Find insertion parent node
     const q = [binaryTree.root];
     let insertionParent = null;
     let insertionType = '';
-
     while (q.length) {
         const node = q.shift();
         const vis = btVisArea.querySelector(`.bt-node[data-value="${node.value}"]`);
@@ -256,35 +264,83 @@ export async function handleInsert(btVisArea, value, setHistoryList, hisnum, dis
     const parentCenterX = parentEl.offsetLeft + nodeSize / 2;
     const parentTop = parentEl.offsetTop;
 
-    const leftWidth = insertionParent.left ? insertionParent.left.subtreeWidth : 0;
-    const rightWidth = insertionParent.right ? insertionParent.right.subtreeWidth : 0;
+    // Temporarily insert the node to get the final layout
+    const tempTree = new BinaryTree();
+    Object.assign(tempTree, JSON.parse(JSON.stringify(binaryTree)));
+    tempTree.insert(numValue);
 
-    const childCenterX = (insertionType === 'left')
-        ? parentCenterX - (rightWidth + minGap) / 2
-        : parentCenterX + (leftWidth + minGap) / 2;
+    const projectedPositions = [];
+    function computeProjectedWidths(node) {
+        if (!node) return 0;
+        const lw = computeProjectedWidths(node.left);
+        const rw = computeProjectedWidths(node.right);
+        node.subtreeWidth = (!node.left && !node.right)
+            ? nodeSize
+            : lw + minGap + rw;
+        return node.subtreeWidth;
+    }
+    computeProjectedWidths(tempTree.root);
 
-    const targetLeft = Math.round(childCenterX - nodeSize / 2);
-    const targetTop = parentTop + levelGap;
+    function assignProjected(node, x, y) {
+        if (!node) return;
+        projectedPositions.push({ node, x, y });
+        const lw = node.left ? node.left.subtreeWidth : 0;
+        const rw = node.right ? node.right.subtreeWidth : 0;
+        if (node.left) {
+            const lx = x - (rw + minGap) / 2;
+            assignProjected(node.left, lx, y + levelGap);
+        }
+        if (node.right) {
+            const rx = x + (lw + minGap) / 2;
+            assignProjected(node.right, rx, y + levelGap);
+        }
+    }
+    assignProjected(tempTree.root, btVisArea.clientWidth / 2, 50);
 
-    const temp = document.createElement('div');
-    temp.classList.add('bt-node', 'temporary');
-    temp.textContent = numValue;
-    temp.dataset.value = numValue;
-    temp.style.position = 'absolute';
-    temp.style.left = `${targetLeft}px`;
-    temp.style.top = `${targetTop}px`;
-    btVisArea.appendChild(temp);
+    // Find position of new node
+    const newPos = projectedPositions.find(p => p.node.value === numValue);
+    const targetLeft = Math.round(newPos.x - nodeSize / 2);
+    const targetTop = Math.round(newPos.y);
 
-    tl.from(temp, {
-        duration: 1,
-        y: -150,
-        scale: 0,
-        opacity: 0,
-        ease: 'back.out(1.7)'
+    // Animate existing nodes to their new positions
+    tl.add(gsap.timeline());
+    originalPositions.forEach(origPos => {
+        const newPos = projectedPositions.find(p => p.node.value === origPos.node.value);
+        if (newPos) {
+            const el = btVisArea.querySelector(`.bt-node[data-value="${origPos.node.value}"]`);
+            if (el) {
+                tl.to(el, {
+                    duration: 0.5,
+                    left: `${Math.round(newPos.x - nodeSize / 2)}px`,
+                    top: `${Math.round(newPos.y)}px`,
+                    ease: "power2.inOut"
+                }, "<");
+            }
+        }
     });
 
+    // Animate new node drop
+    const tempNodeEl = document.createElement('div');
+    tempNodeEl.classList.add('bt-node', 'temporary');
+    tempNodeEl.textContent = numValue;
+    tempNodeEl.dataset.value = numValue;
+    tempNodeEl.style.position = 'absolute';
+    // Set initial state to be invisible at the start of the animation
+    tempNodeEl.style.left = `${targetLeft}px`;
+    tempNodeEl.style.top = `-50px`;
+    tempNodeEl.style.scale = 0;
+    tempNodeEl.style.opacity = 0;
+    btVisArea.appendChild(tempNodeEl);
+
+    tl.to(tempNodeEl, {
+        duration: 0.8,
+        y: `${targetTop}px`,
+        scale: 1,
+        opacity: 1,
+        ease: 'back.out(1.7)'
+    }, "<0.2");
+
     await tl.play();
-    temp.remove();
 
     binaryTree.insert(numValue);
     setHistoryList(prev => [...prev, { id: hisnum, text: `Inserted value ${numValue} into the tree.` }]);
@@ -302,13 +358,23 @@ export async function handleDelete(btVisArea, value, setHistoryList, hisnum, dis
     const { target, deepest, deepestParent } = binaryTree.findDeepestAndTarget(numValue);
 
     if (target) {
+        if (target === binaryTree.root && !binaryTree.root.left && !binaryTree.root.right) {
+            const targetVisualNode = btVisArea.querySelector(`.bt-node[data-value="${target.value}"]`);
+            if (targetVisualNode) {
+                tl.to(targetVisualNode, { duration: 0.8, y: "+=150", opacity: 0, ease: "power2.in" });
+                await tl.play();
+                binaryTree.delete(numValue);
+                setHistoryList(prev => [...prev, { id: hisnum, text: `Deleted root value ${numValue} from the tree.` }]);
+                renderTree(btVisArea);
+            }
+            return;
+        }
+
         const logicalQueue = [binaryTree.root];
         while (logicalQueue.length) {
             const node = logicalQueue.shift();
             const visualNode = btVisArea.querySelector(`.bt-node[data-value="${node.value}"]`);
-            if (visualNode) {
-                animateNode(visualNode, tl);
-            }
+            if (visualNode) animateNode(visualNode, tl);
             if (node === target) break;
             if (node.left) logicalQueue.push(node.left);
             if (node.right) logicalQueue.push(node.right);
@@ -316,14 +382,19 @@ export async function handleDelete(btVisArea, value, setHistoryList, hisnum, dis
 
         const targetVisualNode = btVisArea.querySelector(`.bt-node[data-value="${target.value}"]`);
         const deepestVisualNode = btVisArea.querySelector(`.bt-node[data-value="${deepest.value}"]`);
-
+        
         if (targetVisualNode && deepestVisualNode && target !== deepest) {
+            const initialX = gsap.getProperty(deepestVisualNode, 'x');
+            const initialY = gsap.getProperty(deepestVisualNode, 'y');
+
             tl.to(deepestVisualNode, {
                 duration: 0.8,
-                x: targetVisualNode.offsetLeft - deepestVisualNode.offsetLeft,
-                y: targetVisualNode.offsetTop - deepestVisualNode.offsetTop,
+                x: (targetVisualNode.offsetLeft - deepestVisualNode.offsetLeft) + initialX,
+                y: (targetVisualNode.offsetTop - deepestVisualNode.offsetTop) + initialY,
+                ease: "power2.inOut",
                 onComplete: () => {
                     targetVisualNode.textContent = deepestVisualNode.textContent;
+                    targetVisualNode.dataset.value = deepestVisualNode.dataset.value;
                 }
             });
         }
@@ -332,7 +403,10 @@ export async function handleDelete(btVisArea, value, setHistoryList, hisnum, dis
             duration: 0.8,
             y: "+=150",
             opacity: 0,
-            ease: "power2.in"
+            ease: "power2.in",
+            onComplete: () => {
+                if (deepestVisualNode) deepestVisualNode.remove();
+            }
         }, ">-0.4");
         
         await tl.play();
@@ -388,67 +462,79 @@ export async function handleSearch(btVisArea, value, setHistoryList, hisnum, dis
     setHistoryList(prev => [...prev, { id: hisnum, text: `Searched for value ${numValue}.` }]);
 }
 
+let traversalTimeline = gsap.timeline({ paused: true });
+
+function resetNodes(btVisArea) {
+    gsap.to(btVisArea.querySelectorAll('.bt-node'), {
+        duration: 0.3,
+        scale: 1,
+        ease: 'power1.inOut'
+    });
+}
+
 export async function handleTraversal(btVisArea, type, setHistoryList, hisnum, displayMessage) {
     if (!binaryTree.root) {
         displayMessage("The tree is empty! Please insert some nodes first.");
         return;
     }
 
-    const tl = gsap.timeline();
+    traversalTimeline.clear();
+    resetNodes(btVisArea);
+
     const getVisualNode = (node) => btVisArea.querySelector(`.bt-node[data-value="${node.value}"]`);
     
     switch (type) {
         case 'inorder':
-            await inOrderTraversal(binaryTree.root, tl, getVisualNode);
+            inOrderTraversal(binaryTree.root, traversalTimeline, getVisualNode);
             setHistoryList(prev => [...prev, { id: hisnum, text: `Initiated inorder traversal.` }]);
             break;
         case 'preorder':
-            await preOrderTraversal(binaryTree.root, tl, getVisualNode);
+            preOrderTraversal(binaryTree.root, traversalTimeline, getVisualNode);
             setHistoryList(prev => [...prev, { id: hisnum, text: `Initiated preorder traversal.` }]);
             break;
         case 'postorder':
-            await postOrderTraversal(binaryTree.root, tl, getVisualNode);
+            postOrderTraversal(binaryTree.root, traversalTimeline, getVisualNode);
             setHistoryList(prev => [...prev, { id: hisnum, text: `Initiated postorder traversal.` }]);
             break;
         case 'levelorder':
-            await levelOrderTraversal(tl, getVisualNode);
+            levelOrderTraversal(traversalTimeline, getVisualNode);
             setHistoryList(prev => [...prev, { id: hisnum, text: `Initiated level-order traversal.` }]);
             break;
         default:
             return;
     }
     displayMessage(`Traversal completed: ${type}`);
-    tl.play();
+    traversalTimeline.play();
 }
 
-async function inOrderTraversal(node, tl, getVisualNode) {
+function inOrderTraversal(node, tl, getVisualNode) {
     if (node) {
-        if (node.left) await inOrderTraversal(node.left, tl, getVisualNode);
+        inOrderTraversal(node.left, tl, getVisualNode);
         const visualNode = getVisualNode(node);
         if (visualNode) animateNode(visualNode, tl);
-        if (node.right) await inOrderTraversal(node.right, tl, getVisualNode);
+        inOrderTraversal(node.right, tl, getVisualNode);
     }
 }
 
-async function preOrderTraversal(node, tl, getVisualNode) {
+function preOrderTraversal(node, tl, getVisualNode) {
     if (node) {
         const visualNode = getVisualNode(node);
         if (visualNode) animateNode(visualNode, tl);
-        if (node.left) await preOrderTraversal(node.left, tl, getVisualNode);
-        if (node.right) await preOrderTraversal(node.right, tl, getVisualNode);
+        preOrderTraversal(node.left, tl, getVisualNode);
+        preOrderTraversal(node.right, tl, getVisualNode);
     }
 }
 
-async function postOrderTraversal(node, tl, getVisualNode) {
+function postOrderTraversal(node, tl, getVisualNode) {
     if (node) {
-        if (node.left) await postOrderTraversal(node.left, tl, getVisualNode);
-        if (node.right) await postOrderTraversal(node.right, tl, getVisualNode);
+        postOrderTraversal(node.left, tl, getVisualNode);
+        postOrderTraversal(node.right, tl, getVisualNode);
         const visualNode = getVisualNode(node);
         if (visualNode) animateNode(visualNode, tl);
     }
 }
 
-async function levelOrderTraversal(tl, getVisualNode) {
+function levelOrderTraversal(tl, getVisualNode) {
     if (!binaryTree.root) return;
     const queue = [binaryTree.root];
     while (queue.length > 0) {

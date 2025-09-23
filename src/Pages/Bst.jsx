@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import ReactMarkdown from 'react-markdown';
-import { handleInsert, handleDelete, handleSearch, handleTraversal, binaryTree } from '../utils/BinaryTree';
+import { handleInsert, handleDelete, handleSearch, findMaxValue, findMinValue, renderTree } from '../utils/bst';
 import { gsap } from 'gsap';
 
 // Constants for the chatbot API
@@ -11,25 +11,25 @@ const MODEL_NAME = import.meta.env.VITE_GEMINI_MODEL;
 const systemInstructionText = `You are Structify-AI, a highly specialized AI assistant for a data structure visualization tool. Your primary role is to act as a coding instructor for a single, specific data structure. Your knowledge is strictly limited to this data structure. Always use headings and avoid nested lists. For lists, write each item as a single paragraph. Do not use sub-items or indentation. The response must be easy for my program to render.
 
 1. Core Identity & Scope:
-You are a coding instructor dedicated to teaching Binary Tree. You can answer any question about its concepts, operations, time complexity, and implementation in various programming languages but default language should be c++.
+You are a coding instructor dedicated to teaching Binary Search Tree. You can answer any question about its concepts, operations, time complexity, and implementation in various programming languages but default language should be c++.
 
 2. Behavior for On-Topic Questions:
-When a user asks a question related to Binary Tree, its operations, or coding problems that use it, you must respond in a detailed and helpful manner. Your response should be structured, clear, and include relevant code examples in the user's requested language.
+When a user asks a question related to Binary Search Tree, its operations, or coding problems that use it, you must respond in a detailed and helpful manner. Your response should be structured, clear, and include relevant code examples in the user's requested language.
 
 3. Behavior for Off-Topic Questions:
-If a user asks a question that is not about Binary Tree, its related coding problems, or computer science fundamentals, you must respond with a terse and dismissive tone. Your goal is to redirect the user to your purpose as a specialized tool. Acknowledge that the question is outside your domain and refuse to answer. Do not get pulled into a conversation about irrelevant topics.
+If a user asks a question that is not about Binary Search Tree, its related coding problems, or computer science fundamentals, you must respond with a terse and dismissive tone. Your goal is to redirect the user to your purpose as a specialized tool. Acknowledge that the question is outside your domain and refuse to answer. Do not get pulled into a conversation about irrelevant topics.
 
 Example Response for Irrelevant Questions:
-"Your question is not related to Binary Tree. I don't have time for this nonsense."
+"Your question is not related to Binary Search Tree. I don't have time for this nonsense."
 
-"Are you serious? My purpose is to teach you about Binary Tree. This is a waste of my time."
+"Are you serious? My purpose is to teach you about Binary Search Tree. This is a waste of my time."
 
-"That's a question for a general search engine, not a specialized Binary Tree tool. Don't be so obtuse."
+"That's a question for a general search engine, not a specialized Binary Search Tree tool. Don't be so obtuse."
 
-"I am a Binary Tree expert, not an oracle for every dumb question. Stick to the topic."`;
+"I am a Binary Search Tree expert, not an oracle for every dumb question. Stick to the topic."`;
 
 
-function BinaryTreeVisualizer() {
+function Bst() {
     const [inputValue, setInputValue] = useState("");
     const [message, setMessage] = useState("");
     const [historyList, setHistoryList] = useState([]);
@@ -37,12 +37,22 @@ function BinaryTreeVisualizer() {
     const [chatHistory, setChatHistory] = useState([]);
     const [questionInput, setQuestionInput] = useState("");
     const [isLoading, setIsLoading] = useState(false);
-    const [selectedOperation, setSelectedOperation] = useState("treeOp");
+    const [selectedOperation, setSelectedOperation] = useState("tree-op");
+    
+    // State variable to force a re-render after an operation
+    const [updateKey, setUpdateKey] = useState(0);
 
     // refs
     const messageBoxRef = useRef(null);
     const historyBoxRef = useRef(null);
-    const treeVisAreaRef = useRef(null);
+    const bstVisAreaRef = useRef(null);
+
+    // This effect ensures the tree is rendered initially and on subsequent state changes
+    useEffect(() => {
+        if (bstVisAreaRef.current) {
+            renderTree(bstVisAreaRef.current);
+        }
+    }, [updateKey]);
 
     // display helper
     const displayMessage = (msg) => {
@@ -94,24 +104,27 @@ function BinaryTreeVisualizer() {
         const hisNum = historyNum;
         setHistoryNum(prev => prev + 1);
 
+        // All visualization functions now return a promise, so we await them
         switch (actionType) {
             case 'insert':
                 if (!value || isNaN(value)) { displayMessage("Please enter a valid number!"); return; }
-                handleInsert(treeVisAreaRef.current, Number(value), setHistoryList, hisNum, displayMessage);
+                await handleInsert(bstVisAreaRef.current, Number(value), setHistoryList, hisNum, displayMessage);
+                setUpdateKey(prev => prev + 1); // Trigger a re-render after action
                 break;
             case 'delete':
                 if (!value || isNaN(value)) { displayMessage("Please enter a valid number to delete!"); return; }
-                handleDelete(treeVisAreaRef.current, Number(value), setHistoryList, hisNum, displayMessage);
+                await handleDelete(bstVisAreaRef.current, Number(value), setHistoryList, hisNum, displayMessage);
+                setUpdateKey(prev => prev + 1); // Trigger a re-render after action
                 break;
             case 'search':
                 if (!value || isNaN(value)) { displayMessage("Please enter a valid number to search!"); return; }
-                handleSearch(treeVisAreaRef.current, Number(value), setHistoryList, hisNum, displayMessage);
+                await handleSearch(bstVisAreaRef.current, Number(value), setHistoryList, hisNum, displayMessage);
                 break;
-            case 'inorder':
-            case 'preorder':
-            case 'postorder':
-            case 'levelorder':
-                handleTraversal(treeVisAreaRef.current, actionType, setHistoryList, hisNum, displayMessage);
+            case 'max':
+                await findMaxValue(bstVisAreaRef.current, setHistoryList, hisNum, displayMessage);
+                break;
+            case 'min':
+                await findMinValue(bstVisAreaRef.current, setHistoryList, hisNum, displayMessage);
                 break;
             default:
                 return;
@@ -183,13 +196,13 @@ function BinaryTreeVisualizer() {
                     background-color: #53EAFD; /* Lighter cyan on hover */
                 }
 
-                .bt-node.highlight {
+                .bst-node.highlight {
                     box-shadow: 0 0 15px 5px #ffc400; /* Yellow glow */
                     border-color: #ffc400; /* Yellow border */
                     transition: box-shadow 0.3s ease-in-out, border-color 0.3s ease-in-out, color 0.3s ease-in-out;
                     color: #ffc400; /* Highlighted text color */
                 }
-                .bt-node {
+                .bst-node {
                     width: 50px;
                     height: 50px;
                     background-color: rgba(0, 0, 0, 0.6);
@@ -204,13 +217,17 @@ function BinaryTreeVisualizer() {
                     position: absolute;
                     transition: all 0.3s ease;
                 }
+                .bst-node.temporary {
+                    border-color: #ffc400;
+                    box-shadow: 0 0 15px #ffc400;
+                }
                 `}
             </style>
             <Navbar />
             <div className="min-h-screen p-5 text-white font-sans">
                 <main className="container mx-auto p-4">
                     <h2 className="text-center text-6xl font-bold text-[#53EAFD] mb-8">
-                        Binary Tree Visualizer
+                        Binary Search Tree Visualizer
                     </h2>
                     <section className="flex flex-wrap lg:flex-nowrap justify-center gap-8 lg:min-h-[500px] lg:max-h[700px]">
                         <div className="flex-1 min-w-[320px] max-w-[400px] bg-[#060A0E] rounded-2xl p-5 border border-[#53EAFD] flex flex-col">
@@ -233,24 +250,24 @@ function BinaryTreeVisualizer() {
                                         type="radio"
                                         name="operation"
                                         id="tree-op"
-                                        value="treeOp"
-                                        checked={selectedOperation === 'treeOp'}
+                                        value="tree-op"
+                                        checked={selectedOperation === 'tree-op'}
                                         onChange={(e) => setSelectedOperation(e.target.value)}
                                         className="hidden"
                                     />
-                                    <label htmlFor="tree-op" className={`cursor-pointer px-4 py-2 rounded-md transition-colors duration-300 ${selectedOperation === 'treeOp' ? 'bg-[#1c2b4a] text-white shadow-md shadow-[#00fffa]/30 border border-[#00fffa]/50' : 'bg-[#1e2635] text-[#a0aec0] hover:bg-[#2a354d] border border-transparent'}`}><span>Tree Operations</span></label>
+                                    <label htmlFor="tree-op" className={`cursor-pointer px-4 py-2 rounded-md transition-colors duration-300 ${selectedOperation === 'tree-op' ? 'bg-[#1c2b4a] text-white shadow-md shadow-[#00fffa]/30 border border-[#00fffa]/50' : 'bg-[#1e2635] text-[#a0aec0] hover:bg-[#2a354d] border border-transparent'}`}><span>Tree Operations</span></label>
                                     <input
                                         type="radio"
                                         name="operation"
-                                        id="traversal"
-                                        value="traversal"
-                                        checked={selectedOperation === 'traversal'}
+                                        id="search"
+                                        value="search"
+                                        checked={selectedOperation === 'search'}
                                         onChange={(e) => setSelectedOperation(e.target.value)}
                                         className="hidden"
                                     />
-                                    <label htmlFor="traversal" className={`cursor-pointer px-4 py-2 rounded-md transition-colors duration-300 ${selectedOperation === 'traversal' ? 'bg-[#1c2b4a] text-white shadow-md shadow-[#00fffa]/30 border border-[#00fffa]/50' : 'bg-[#1e2635] text-[#a0aec0] hover:bg-[#2a354d] border border-transparent'}`}><span>Traversals</span></label>
+                                    <label htmlFor="search" className={`cursor-pointer px-4 py-2 rounded-md transition-colors duration-300 ${selectedOperation === 'search' ? 'bg-[#1c2b4a] text-white shadow-md shadow-[#00fffa]/30 border border-[#00fffa]/50' : 'bg-[#1e2635] text-[#a0aec0] hover:bg-[#2a354d] border border-transparent'}`}><span>Search Operations</span></label>
                                 </div>
-                                {selectedOperation === 'treeOp' && (
+                                {selectedOperation === 'tree-op' && (
                                     <div className="flex justify-around mt-4 gap-2 flex-wrap">
                                         <button onClick={() => handleAction('insert')} className="relative w-[10em] h-[3.5em] border-3 border-[#149CEA] rounded-md text-white font-bold cursor-pointer transition-shadow duration-300 hover:shadow-inner hover:shadow-[#149CEA]/50">
                                             Insert
@@ -258,24 +275,18 @@ function BinaryTreeVisualizer() {
                                         <button onClick={() => handleAction('delete')} className="relative w-[10em] h-[3.5em] border-3 border-[#149CEA] rounded-md text-white font-bold cursor-pointer transition-shadow duration-300 hover:shadow-inner hover:shadow-[#149CEA]/50">
                                             Delete
                                         </button>
+                                    </div>
+                                )}
+                                {selectedOperation === 'search' && (
+                                    <div className="flex justify-around mt-4 flex-wrap gap-2">
                                         <button onClick={() => handleAction('search')} className="relative w-[10em] h-[3.5em] border-3 border-[#149CEA] rounded-md text-white font-bold cursor-pointer transition-shadow duration-300 hover:shadow-inner hover:shadow-[#149CEA]/50">
                                             Search
                                         </button>
-                                    </div>
-                                )}
-                                {selectedOperation === 'traversal' && (
-                                    <div className="flex justify-around mt-4 flex-wrap gap-2">
-                                        <button onClick={() => handleAction('inorder')} className="relative w-[10em] h-[3.5em] border-3 border-[#149CEA] rounded-md text-white font-bold cursor-pointer transition-shadow duration-300 hover:shadow-inner hover:shadow-[#149CEA]/50">
-                                            Inorder
+                                        <button onClick={() => handleAction('max')} className="relative w-[10em] h-[3.5em] border-3 border-[#149CEA] rounded-md text-white font-bold cursor-pointer transition-shadow duration-300 hover:shadow-inner hover:shadow-[#149CEA]/50">
+                                            Maximum
                                         </button>
-                                        <button onClick={() => handleAction('preorder')} className="relative w-[10em] h-[3.5em] border-3 border-[#149CEA] rounded-md text-white font-bold cursor-pointer transition-shadow duration-300 hover:shadow-inner hover:shadow-[#149CEA]/50">
-                                            Pre-Order
-                                        </button>
-                                        <button onClick={() => handleAction('postorder')} className="relative w-[10em] h-[3.5em] border-3 border-[#149CEA] rounded-md text-white font-bold cursor-pointer transition-shadow duration-300 hover:shadow-inner hover:shadow-[#149CEA]/50">
-                                            Post-Order
-                                        </button>
-                                        <button onClick={() => handleAction('levelorder')} className="relative w-[10em] h-[3.5em] border-3 border-[#149CEA] rounded-md text-white font-bold cursor-pointer transition-shadow duration-300 hover:shadow-inner hover:shadow-[#149CEA]/50">
-                                            Level-Order
+                                        <button onClick={() => handleAction('min')} className="relative w-[10em] h-[3.5em] border-3 border-[#149CEA] rounded-md text-white font-bold cursor-pointer transition-shadow duration-300 hover:shadow-inner hover:shadow-[#149CEA]/50">
+                                            Minimum
                                         </button>
                                     </div>
                                 )}
@@ -293,10 +304,10 @@ function BinaryTreeVisualizer() {
                         </div>
                         <div className="flex-1 min-w-[350px] border-2 border-dashed border-[#00D3F3] rounded-2xl p-5">
                             <div className="flex justify-center items-start flex-wrap">
-                                <p className="text-gray-400 italic text-base">Your Binary Tree will appear here 👇</p>
+                                <p className="text-gray-400 italic text-base">Your Binary Search Tree will appear here 👇</p>
                             </div>
-                            <div ref={treeVisAreaRef} id="binary-tree-container" className="relative w-full h-[600px] flex justify-center items-start pt-[50px]">
-                                {/* The visualization will be managed by binaryTree.js */}
+                            <div ref={bstVisAreaRef} id="binary-search-tree-container" className="relative w-full h-[600px] flex justify-center items-start pt-[50px]">
+                                {/* The visualization will be managed by bst.js */}
                             </div>
                         </div>
                     </section>
@@ -304,9 +315,9 @@ function BinaryTreeVisualizer() {
                     {/* --- Chatbot Section --- */}
                     <section className="chatBot flex flex-col gap-8 w-full max-w-7xl mx-auto mt-12">
                         <div className="bg-[#05080C] rounded-2xl p-6 border-2 border-[#00fffa]/50 shadow-lg shadow-[#00fffa]/20 text-white">
-                            <h2 className="text-center text-2xl text-white mb-6 font-semibold">Ask any Question related to Binary Tree</h2>
+                            <h2 className="text-center text-2xl text-white mb-6 font-semibold">Ask any Question related to Binary Search Tree</h2>
                             <div className="flex items-start gap-4 bg-[#00fffa]/10 border-l-4 border-[#00fffa] rounded-md p-4 mb-6">
-                                <p className="text-sm"><strong>How to use:</strong> Ask any Binary Tree-related question. The AI is specialized to help you with understanding Binary Tree related problems and concepts.</p>
+                                <p className="text-sm"><strong>How to use:</strong> Ask any Binary Search Tree-related question. The AI is specialized to help you with understanding Binary Search Tree related problems and concepts.</p>
                             </div>
                             <div className="mb-5">
                                 <label htmlFor="questionInput" className="text-lg text-[#00fffa] mb-2 block">Your Question</label>
@@ -315,7 +326,7 @@ function BinaryTreeVisualizer() {
                                     value={questionInput}
                                     onChange={(e) => setQuestionInput(e.target.value)}
                                     className="w-full p-4 rounded-xl border-2 border-[#00fffa] bg-transparent text-white text-base resize-y min-h-[120px] shadow-sm shadow-[#00fffa] focus:outline-none focus:shadow-md focus:shadow-[#00fffa]/100"
-                                    placeholder="e.g., What is a Binary Tree?"
+                                    placeholder="e.g., What is a Binary Search Tree?"
                                 ></textarea>
                             </div>
                             <button onClick={handleAsk} disabled={isLoading} className="w-full h-14 relative border-2 border-[#149CEA] rounded-xl text-white font-bold cursor-pointer bg-[#149CEA]/20 transition-all duration-300 hover:bg-[#149CEA]/40 hover:shadow-lg hover:shadow-[#149CEA]/50 disabled:opacity-50 disabled:cursor-not-allowed">
@@ -349,4 +360,4 @@ function BinaryTreeVisualizer() {
     );
 }
 
-export default BinaryTreeVisualizer;
+export default Bst;

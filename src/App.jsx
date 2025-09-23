@@ -11,6 +11,8 @@ import LinkedListVisualizer from "./Pages/LinkedListVisualizer";
 import DoublyLinkedListVisualizer from "./Pages/DoublyLinkedListVisualizer";
 import ScrollToTop from "./components/ScrollToTop";
 import BinaryTreeVisualizer from "./Pages/BinaryTreeVisualizer";
+import Bst from "./Pages/Bst";
+
 
 const App = () => {
   return (
@@ -27,6 +29,7 @@ const App = () => {
         <Route path="/visualization/SinglyLinkedList" element={<LinkedListVisualizer />} />
         <Route path="/visualization/DoublyLinkedList" element={<DoublyLinkedListVisualizer />} />
         <Route path="/visualization/BinaryTree" element={<BinaryTreeVisualizer />} />
+        <Route path="/visualization/BinarySearchTree" element={<Bst />} />
         {/* fallback for invalid routes */}
         <Route path="*" element={<NotFound />} />
       </Routes>

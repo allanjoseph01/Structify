@@ -7,6 +7,7 @@ import Footer from '../components/Footer'
 import DataStructureCard from '../components/ui/DataStructureCard'
 import ChatCard from '../components/ChatCard'
 import { Link } from 'react-router-dom'
+import { HashLink } from 'react-router-hash-link';
 
 const Index = () => {
   return (
@@ -39,16 +40,18 @@ const Index = () => {
         {/* Buttons */}
         <div className='flex w-full justify-center gap-3 mt-8 flex-col sm:flex-row items-center'>
           {/* Start Visualizing Button */}
-          <button className="bg-[#00D4FF] rounded-lg px-6 py-3 font-semibold cursor-pointer flex items-center gap-3 text-black transition-all duration-300 group hover:scale-105">
-            {/* Play Icon */}
-            <span className="bi bi-play text-xl transform transition-transform duration-300 group-hover:scale-125"></span>
+          <HashLink smooth to="/#DataStructure">
+            <button className="bg-[#00D4FF] rounded-lg px-6 py-3 font-semibold cursor-pointer flex items-center gap-3 text-black transition-all duration-300 group hover:scale-105">
+              {/* Play Icon */}
+              <span className="bi bi-play text-xl transform transition-transform duration-300 group-hover:scale-125"></span>
 
-            {/* Text */}
-            Start Visualizing
+              {/* Text */}
+              Start Visualizing
 
-            {/* Arrow Icon */}
-            <span className="bi bi-arrow-right text-xl transform transition-transform duration-300 group-hover:translate-x-2"></span>
-          </button>
+              {/* Arrow Icon */}
+              <span className="bi bi-arrow-right text-xl transform transition-transform duration-300 group-hover:translate-x-2"></span>
+            </button>
+          </HashLink>
 
           {/* Learn More Button */}
           <Link to="/documentation">
@@ -78,7 +81,7 @@ const Index = () => {
           </div>
           <div className='h-full flex flex-col gap-20' style={{justifyContent:"center"}}>
             <div className='flex gap-10'>
-              <FeatureBox percentage="95%" text="Better Retention" />
+              <FeatureBox percentage="65%" text="Better Retention" />
               <FeatureBox percentage="3x" text="Faster Learning" />
               <FeatureBox percentage="∞" text="Practice" />
             </div>
