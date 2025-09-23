@@ -12,6 +12,9 @@ import DoublyLinkedListVisualizer from "./Pages/DoublyLinkedListVisualizer";
 import ScrollToTop from "./components/ScrollToTop";
 import BinaryTreeVisualizer from "./Pages/BinaryTreeVisualizer";
 import Bst from "./Pages/Bst";
+import MaxHeapVisualizer from "./Pages/MaxHeapVisualizer";
+import MinHeapVisualizer from "./Pages/MinHeapVisualizer";
+import AvlTreeVisualizer from "./Pages/AvlTreeVisualizer";
 
 
 const App = () => {
@@ -30,6 +33,9 @@ const App = () => {
         <Route path="/visualization/DoublyLinkedList" element={<DoublyLinkedListVisualizer />} />
         <Route path="/visualization/BinaryTree" element={<BinaryTreeVisualizer />} />
         <Route path="/visualization/BinarySearchTree" element={<Bst />} />
+        <Route path="/visualization/MaxHeap" element={<MaxHeapVisualizer />} />
+        <Route path="/visualization/MinHeap" element={<MinHeapVisualizer />} />
+        <Route path="/visualization/AVLTree" element={<AvlTreeVisualizer />} />
         {/* fallback for invalid routes */}
         <Route path="*" element={<NotFound />} />
       </Routes>
