@@ -8,10 +8,14 @@ import NotFound from './Pages/NotFound';
 import StackVisualizer from "./Pages/StackVisualizer";
 import QueueVisualizer from "./Pages/QueueVisualizer";
 import LinkedListVisualizer from "./Pages/LinkedListVisualizer";
+import DoublyLinkedListVisualizer from "./Pages/DoublyLinkedListVisualizer";
+import ScrollToTop from "./components/ScrollToTop";
+import BinaryTreeVisualizer from "./Pages/BinaryTreeVisualizer";
 
 const App = () => {
   return (
     <Router>
+      <ScrollToTop />
       <Routes>
         <Route path="/" element={<Index />} />
         <Route path="/features" element={<Features />} />
@@ -21,6 +25,8 @@ const App = () => {
         <Route path="/visualization/stack" element={<StackVisualizer />} />
         <Route path="/visualization/Queue" element={<QueueVisualizer />} />
         <Route path="/visualization/SinglyLinkedList" element={<LinkedListVisualizer />} />
+        <Route path="/visualization/DoublyLinkedList" element={<DoublyLinkedListVisualizer />} />
+        <Route path="/visualization/BinaryTree" element={<BinaryTreeVisualizer />} />
         {/* fallback for invalid routes */}
         <Route path="*" element={<NotFound />} />
       </Routes>

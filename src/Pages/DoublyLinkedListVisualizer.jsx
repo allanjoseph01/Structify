@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import ReactMarkdown from 'react-markdown';
-import { handleInsertAtHead, handleInsertAtTail, handleInsertAtPosition, handleRemoveFromHead, handleRemoveFromTail, handleRemoveByValue, handleSearchForValue, linkedList } from '../utils/SinglyLinkedList';
+import { handleInsertAtHead, handleInsertAtTail, handleInsertAtPosition, handleRemoveFromHead, handleRemoveFromTail, handleRemoveByValue, handleSearchForValue, dll } from '../utils/DoublyLinkedList';
 import { gsap } from 'gsap';
 
 // Constants for the chatbot API
@@ -11,25 +11,25 @@ const MODEL_NAME = import.meta.env.VITE_GEMINI_MODEL;
 const systemInstructionText = `You are Structify-AI, a highly specialized AI assistant for a data structure visualization tool. Your primary role is to act as a coding instructor for a single, specific data structure. Your knowledge is strictly limited to this data structure. Always use headings and avoid nested lists. For lists, write each item as a single paragraph. Do not use sub-items or indentation. The response must be easy for my program to render.
 
 1. Core Identity & Scope:
-You are a coding instructor dedicated to teaching Linked List. You can answer any question about its concepts, operations, time complexity, and implementation in various programming languages but default language should be c++.
+You are a coding instructor dedicated to teaching Doubly Linked List. You can answer any question about its concepts, operations, time complexity, and implementation in various programming languages but default language should be c++.
 
 2. Behavior for On-Topic Questions:
-When a user asks a question related to Linked List, its operations, or coding problems that use it, you must respond in a detailed and helpful manner. Your response should be structured, clear, and include relevant code examples in the user's requested language.
+When a user asks a question related to Doubly Linked List, its operations, or coding problems that use it, you must respond in a detailed and helpful manner. Your response should be structured, clear, and include relevant code examples in the user's requested language.
 
 3. Behavior for Off-Topic Questions:
-If a user asks a question that is not about Linked List, its related coding problems, or computer science fundamentals, you must respond with a terse and dismissive tone. Your goal is to redirect the user to your purpose as a specialized tool. Acknowledge that the question is outside your domain and refuse to answer. Do not get pulled into a conversation about irrelevant topics.
+If a user asks a question that is not about Doubly Linked List, its related coding problems, or computer science fundamentals, you must respond with a terse and dismissive tone. Your goal is to redirect the user to your purpose as a specialized tool. Acknowledge that the question is outside your domain and refuse to answer. Do not get pulled into a conversation about irrelevant topics.
 
 Example Response for Irrelevant Questions:
-"Your question is not related to Linked List. I don't have time for this nonsense."
+"Your question is not related to Doubly Linked List. I don't have time for this nonsense."
 
-"Are you serious? My purpose is to teach you about Linked List. This is a waste of my time."
+"Are you serious? My purpose is to teach you about Doubly Linked List. This is a waste of my time."
 
-"That's a question for a general search engine, not a specialized Linked List tool. Don't be so obtuse."
+"That's a question for a general search engine, not a specialized Doubly Linked List tool. Don't be so obtuse."
 
-"I am a Linked List expert, not an oracle for every dumb question. Stick to the topic."`;
+"I am a Doubly Linked List expert, not an oracle for every dumb question. Stick to the topic."`;
 
 
-function SinglyLinkedListVisualizer() {
+function DoublyLinkedListVisualizer() {
     const [inputValue, setInputValue] = useState("");
     const [positionInput, setPositionInput] = useState("");
     const [message, setMessage] = useState("");
@@ -101,26 +101,26 @@ function SinglyLinkedListVisualizer() {
         switch (actionType) {
             case 'insertHead':
                 if (!value) { displayMessage("Please enter a value!"); return; }
-                if (linkedList.size >= 7) { displayMessage("Linked List is full!"); return; }
+                if (dll.size >= 7) { displayMessage("Doubly Linked List is full!"); return; }
                 handleInsertAtHead(listVisAreaRef.current, value, setHistoryList, hisNum);
                 break;
             case 'insertTail':
                 if (!value) { displayMessage("Please enter a value!"); return; }
-                if (linkedList.size >= 7) { displayMessage("Linked List is full!"); return; }
+                if (dll.size >= 7) { displayMessage("Doubly Linked List is full!"); return; }
                 handleInsertAtTail(listVisAreaRef.current, value, setHistoryList, hisNum);
                 break;
             case 'insertPosition':
                 if (!value || positionInput.trim() === '') { displayMessage("Please enter both a value and a position!"); return; }
-                if (position > linkedList.size || position < 0) { displayMessage("Index is invalid!"); return; }
-                if (linkedList.size >= 7) { displayMessage("Linked List is full!"); return; }
+                if (position > dll.size || position < 0) { displayMessage("Index is invalid!"); return; }
+                if (dll.size >= 7) { displayMessage("Doubly Linked List is full!"); return; }
                 handleInsertAtPosition(listVisAreaRef.current, value, position, setHistoryList, hisNum, displayMessage);
                 break;
             case 'removeHead':
-                if (linkedList.head === null) { displayMessage("Linked List is empty!"); return; }
+                if (dll.head === null) { displayMessage("Doubly Linked List is empty!"); return; }
                 handleRemoveFromHead(listVisAreaRef.current, setHistoryList, hisNum);
                 break;
             case 'removeTail':
-                if (linkedList.head === null) { displayMessage("Linked List is empty!"); return; }
+                if (dll.head === null) { displayMessage("Doubly Linked List is empty!"); return; }
                 handleRemoveFromTail(listVisAreaRef.current, setHistoryList, hisNum);
                 break;
             case 'removeValue':
@@ -206,12 +206,12 @@ function SinglyLinkedListVisualizer() {
                 }
 
                 .node.highlight {
-                    box-shadow: 0 0 15px 5px #ffc400; /* Yellow glow */
-                    border-color: #ffc400; /* Yellow border */
+                    box-shadow: 0 0 15px 5px #00fffa; /* Cyan-blue glow */
+                    border-color: #00fffa; /* Cyan-blue border */
                     transition: box-shadow 0.3s ease-in-out, border-color 0.3s ease-in-out, color 0.3s ease-in-out;
-                    color: #ffc400; /* Highlighted text color */
+                    color: #00fffa; /* Highlighted text color */
                 }
-                .node {
+                .d-node {
                     display: flex;
                     flex-direction: row;
                     align-items: center;
@@ -224,35 +224,53 @@ function SinglyLinkedListVisualizer() {
                     background-color: rgba(0, 0, 0, 0.6);
                     justify-content: center;
                 }
-                .node-data {
+                .d-node.highlight {
+                    box-shadow: 0 0 15px 5px #ffc400;
+                    border-color: #ffc400;
+                    transition: box-shadow 0.3s ease-in-out, border-color 0.3s ease-in-out;
+                }
+                .d-node-data {
                     text-align: center;
                     font-size: 1.1rem;
                     color: white;
                 }
-                .arrow {
+                .d-arrow-wrapper {
                     position: relative;
                     width: 40px;
+                    height: 20px;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: space-between;
+                    align-items: center;
+                }
+                .d-arrow-next, .d-arrow-prev {
+                    position: relative;
+                    width: 100%;
                     height: 2px;
                     background-color: #00D3F3;
                     box-shadow: 0 0 5px #00D3F3;
                 }
-                .arrow::after {
+                .d-arrow-next::after {
                     content: '';
                     position: absolute;
-                    right: -5px;
+                    right: 0;
                     top: -4px;
                     width: 0;
                     height: 0;
                     border-top: 5px solid transparent;
                     border-bottom: 5px solid transparent;
                     border-left: 5px solid #00D3F3;
-                    box-shadow: 0 0 5px #00D3F3;
                 }
-                .node.temporary {
+                .d-arrow-prev::before {
+                    content: '';
                     position: absolute;
-                    z-index: 10;
-                    border-color: #ffc400; 
-                    box-shadow: 0 0 15px #ffc400;
+                    left: 0;
+                    top: -4px;
+                    width: 0;
+                    height: 0;
+                    border-top: 5px solid transparent;
+                    border-bottom: 5px solid transparent;
+                    border-right: 5px solid #00D3F3;
                 }
                 `}
             </style>
@@ -260,7 +278,7 @@ function SinglyLinkedListVisualizer() {
             <div className="min-h-screen p-5 text-white font-sans">
                 <main className="container mx-auto p-4">
                     <h2 className="text-center text-6xl font-bold text-[#53EAFD] mb-8">
-                        Singly Linked List Visualizer
+                        Doubly Linked List Visualizer
                     </h2>
                     <section className="flex flex-wrap lg:flex-nowrap justify-center gap-8 lg:min-h-[500px] lg:max-h[700px]">
                         <div className="flex-1 min-w-[320px] max-w-[400px] bg-[#060A0E] rounded-2xl p-5 border border-[#53EAFD] flex flex-col">
@@ -379,10 +397,10 @@ function SinglyLinkedListVisualizer() {
                         </div>
                         <div className="flex-1 min-w-[350px] border-2 border-dashed border-[#00D3F3] rounded-2xl p-5">
                             <div className="flex justify-center items-start flex-wrap">
-                                <p className="text-gray-400 italic text-base">Your Singly Linked List will appear here 👇</p>
+                                <p className="text-gray-400 italic text-base">Your Doubly Linked List will appear here 👇</p>
                             </div>
                             <div ref={listVisAreaRef} className="flex flex-row justify-start items-center mt-5 h-[350px] gap-2">
-                                {/* The visualization will be managed by SinglyLinkedList.js */}
+                                {/* The visualization will be managed by DoublyLinkedList.js */}
                             </div>
                         </div>
                     </section>
@@ -390,9 +408,9 @@ function SinglyLinkedListVisualizer() {
                     {/* --- Chatbot Section --- */}
                     <section className="chatBot flex flex-col gap-8 w-full max-w-7xl mx-auto mt-12">
                         <div className="bg-[#05080C] rounded-2xl p-6 border-2 border-[#00fffa]/50 shadow-lg shadow-[#00fffa]/20 text-white">
-                            <h2 className="text-center text-2xl text-white mb-6 font-semibold">Ask any Question related to Linked List</h2>
+                            <h2 className="text-center text-2xl text-white mb-6 font-semibold">Ask any Question related to Doubly Linked List</h2>
                             <div className="flex items-start gap-4 bg-[#00fffa]/10 border-l-4 border-[#00fffa] rounded-md p-4 mb-6">
-                                <p className="text-sm"><strong>How to use:</strong> Ask any Linked List-related question. The AI is specialized to help you with understanding Linked List related problems and concepts.</p>
+                                <p className="text-sm"><strong>How to use:</strong> Ask any Doubly Linked List-related question. The AI is specialized to help you with understanding Doubly Linked List related problems and concepts.</p>
                             </div>
                             <div className="mb-5">
                                 <label htmlFor="questionInput" className="text-lg text-[#00fffa] mb-2 block">Your Question</label>
@@ -401,7 +419,7 @@ function SinglyLinkedListVisualizer() {
                                     value={questionInput}
                                     onChange={(e) => setQuestionInput(e.target.value)}
                                     className="w-full p-4 rounded-xl border-2 border-[#00fffa] bg-transparent text-white text-base resize-y min-h-[120px] shadow-sm shadow-[#00fffa] focus:outline-none focus:shadow-md focus:shadow-[#00fffa]/100"
-                                    placeholder="e.g., What is a Linked List?"
+                                    placeholder="e.g., What is a Doubly Linked List?"
                                 ></textarea>
                             </div>
                             <button onClick={handleAsk} disabled={isLoading} className="w-full h-14 relative border-2 border-[#149CEA] rounded-xl text-white font-bold cursor-pointer bg-[#149CEA]/20 transition-all duration-300 hover:bg-[#149CEA]/40 hover:shadow-lg hover:shadow-[#149CEA]/50 disabled:opacity-50 disabled:cursor-not-allowed">
@@ -435,4 +453,4 @@ function SinglyLinkedListVisualizer() {
     );
 }
 
-export default SinglyLinkedListVisualizer;
+export default DoublyLinkedListVisualizer;

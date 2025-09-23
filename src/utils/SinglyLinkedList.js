@@ -1,350 +1,297 @@
 import { gsap } from 'gsap';
 
-// Helper function to get all nodes/arrows from the DOM
-const getVisualElements = (containerRef) => {
-    if (!containerRef) return { nodes: [], arrows: [] };
-    const nodes = Array.from(containerRef.querySelectorAll(".node"));
-    const arrows = Array.from(containerRef.querySelectorAll(".arrow"));
-    return { nodes, arrows };
-};
+// A class for a single node in the linked list
+class Node {
+    constructor(data) {
+        this.data = data;
+        this.next = null;
+    }
+}
 
-// Utility: Reset all transforms and highlights
-const resetVisualState = (containerRef) => {
-    const { nodes, arrows } = getVisualElements(containerRef);
-    nodes.forEach(node => {
-        gsap.set(node, { x: 0, y: 0, scale: 1, opacity: 1 });
-        node.classList.remove('highlight');
-    });
-    arrows.forEach(arrow => {
-        gsap.set(arrow, { x: 0, opacity: 1 });
-    });
-};
+// A class to manage the linked list
+class LinkedList {
+    constructor() {
+        this.head = null;
+        this.tail = null;
+        this.size = 0;
+    }
+}
 
-// Main insert-at-head handler (React integration)
-export const handleInsertAtHead = async (containerRef, listArr, value) => {
-    // Update state first
-    const newArr = [{ value, id: Date.now() }, ...listArr];
-    // Wait for React to render
-    await new Promise(resolve => setTimeout(resolve, 0));
-    resetVisualState(containerRef);
+// Global instance of the Singly Linked List
+export const linkedList = new LinkedList();
 
-    const { nodes, arrows } = getVisualElements(containerRef);
-    if (nodes.length > 0) {
-        gsap.from(nodes[0], {
+/**
+ * Renders the entire linked list into the visualization area.
+ * @param {HTMLElement} listVisArea The DOM element to render the list inside.
+ */
+function renderList(listVisArea) {
+    listVisArea.innerHTML = '';
+    
+    if (linkedList.head === null) {
+        const placeholderText = document.createElement('p');
+        placeholderText.classList.add('text-gray-400', 'italic', 'text-base');
+        placeholderText.textContent = 'Your Singly Linked List will appear here 👇';
+        listVisArea.appendChild(placeholderText);
+        return;
+    }
+    
+    let currentNode = linkedList.head;
+    let delayTime = 0;
+    let index = 0;
+
+    while (currentNode !== null) {
+        const nodeElement = document.createElement('div');
+        nodeElement.classList.add('node');
+        nodeElement.dataset.index = index;
+        
+        const dataBox = document.createElement('div');
+        dataBox.classList.add('node-data');
+        dataBox.textContent = currentNode.data;
+        
+        nodeElement.appendChild(dataBox);
+        listVisArea.appendChild(nodeElement);
+        
+        gsap.from(nodeElement, {
             x: 50,
             opacity: 0,
             duration: 0.6,
-            ease: "back.out(1.7)",
+            delay: delayTime,
+            ease: 'back.out(1.7)'
         });
-    }
-    if (arrows.length > 0) {
-        gsap.from(arrows[0], {
-            x: 50,
-            opacity: 0,
-            duration: 0.6,
-            delay: 0.2,
-            ease: "back.out(1.7)",
-        });
-    }
-    return newArr;
-};
-
-// Insert at tail with animation
-export const handleInsertAtTail = async (containerRef, listArr, value) => {
-    const newArr = [...listArr, { value, id: Date.now() }];
-    await new Promise(resolve => setTimeout(resolve, 0));
-    resetVisualState(containerRef);
-
-    const { nodes, arrows } = getVisualElements(containerRef);
-    if (nodes.length > 0) {
-        const lastNode = nodes[nodes.length - 1];
-        gsap.from(lastNode, {
-            x: 50,
-            opacity: 0,
-            duration: 0.6,
-            ease: "back.out(1.7)",
-        });
-    }
-    if (arrows.length > 0) {
-        const lastArrow = arrows[arrows.length - 1];
-        gsap.from(lastArrow, {
-            x: 50,
-            opacity: 0,
-            duration: 0.6,
-            delay: 0.2,
-            ease: "back.out(1.7)",
-        });
-    }
-    return newArr;
-};
-
-// Remove from head with animation
-export const handleRemoveFromHead = async (containerRef, listArr) => {
-    if (listArr.length === 0) {
-        console.log("Linked List is empty!");
-        return listArr;
-    }
-    resetVisualState(containerRef);
-
-    const { nodes, arrows } = getVisualElements(containerRef);
-    if (nodes.length > 0) {
-        await gsap.to(nodes[0], {
-            x: -50,
-            opacity: 0,
-            duration: 0.5,
-            ease: "power2.in",
-        });
-    }
-    // Animate remaining nodes/arrows to shift left, but reset after animation
-    if (nodes.length > 1) {
-        await gsap.to(nodes.slice(1), {
-            x: 0,
-            duration: 0.5,
-            ease: "power2.out",
-        });
-    }
-    if (arrows.length > 0) {
-        await gsap.to(arrows, {
-            x: 0,
-            duration: 0.5,
-            ease: "power2.out",
-        });
-    }
-    // Wait for React to re-render, then reset
-    const newArr = listArr.slice(1);
-    await new Promise(resolve => setTimeout(resolve, 0));
-    resetVisualState(containerRef);
-    return newArr;
-};
-
-// Remove from tail with animation
-export const handleRemoveFromTail = async (containerRef, listArr) => {
-    if (listArr.length === 0) {
-        console.log("Linked List is empty!");
-        return listArr;
-    }
-    resetVisualState(containerRef);
-
-    const { nodes, arrows } = getVisualElements(containerRef);
-    if (nodes.length > 0) {
-        const lastNode = nodes[nodes.length - 1];
-        await gsap.to(lastNode, {
-            scale: 0.1,
-            opacity: 0,
-            duration: 0.6,
-            ease: "power2.in",
-        });
-    }
-    if (arrows.length > 0) {
-        const lastArrow = arrows[arrows.length - 1];
-        await gsap.to(lastArrow, {
-            opacity: 0,
-            duration: 0.4,
-            ease: "power2.in",
-        });
-    }
-    const newArr = listArr.slice(0, -1);
-    await new Promise(resolve => setTimeout(resolve, 0));
-    resetVisualState(containerRef);
-    return newArr;
-};
-
-// Insert at position (0..length) with animation
-export const handleInsertAtPosition = async (containerRef, listArr, value, position) => {
-    if (position < 0 || position > listArr.length) {
-        console.error("Invalid position for insertion.");
-        return listArr;
-    }
-    if (listArr.length >= 7) {
-        console.error("Linked list is full!");
-        return listArr;
-    }
-    // Prepare new array
-    const newNodeData = { value, id: Date.now() };
-    const newArr = [...listArr.slice(0, position), newNodeData, ...listArr.slice(position)];
-    // Wait for React to render
-    await new Promise(resolve => setTimeout(resolve, 0));
-    resetVisualState(containerRef);
-
-    const { nodes, arrows } = getVisualElements(containerRef);
-    const tl = gsap.timeline();
-
-    // Animate traversal up to position
-    for (let i = 0; i < position; i++) {
-        tl.to(nodes[i], {
-            scale: 1.1,
-            duration: 0.3,
-            ease: 'power1.inOut',
-            onStart: () => nodes[i].classList.add('highlight'),
-            onReverseComplete: () => nodes[i].classList.remove('highlight')
-        });
-        tl.to(nodes[i], {
-            scale: 1,
-            duration: 0.2,
-            ease: 'power1.inOut',
-            onComplete: () => nodes[i].classList.remove('highlight')
-        }, ">-0.1");
-    }
-
-    // Animate new node appearing
-    const newNode = nodes[position];
-    if (newNode) {
-        gsap.set(newNode, { x: -50, opacity: 0, scale: 1 });
-        tl.to(newNode, {
-            x: 0,
-            opacity: 1,
-            duration: 0.6,
-            ease: "back.out(1.7)",
-        }, "<");
-    }
-
-    // Animate arrows if needed (no shifting, just fade in if new)
-    if (arrows.length > 0 && position < arrows.length) {
-        const arrow = arrows[position];
-        if (arrow) {
-            gsap.set(arrow, { x: -50, opacity: 0 });
-            tl.to(arrow, {
-                x: 0,
-                opacity: 1,
-                duration: 0.5,
-                ease: "back.out(1.7)",
-            }, "<");
-        }
-    }
-
-    await tl;
-    resetVisualState(containerRef);
-    return newArr;
-};
-
-// Remove by value (first occurrence) with animation
-export const handleRemoveByValue = async (containerRef, listArr, value) => {
-    if (listArr.length === 0) {
-        console.error('Linked List is empty!');
-        return { success: false, newListArr: listArr, message: "Linked List is empty!", newHistoryText: "Failed to remove from empty list." };
-    }
-    resetVisualState(containerRef);
-
-    const indexToRemove = listArr.findIndex(node => node.value.toString() === value.toString());
-    if (indexToRemove === -1) {
-        return { success: false, newListArr: listArr, message: `Value ${value} not found.`, newHistoryText: `Failed to remove ${value}.` };
-    }
-
-    const { nodes, arrows } = getVisualElements(containerRef);
-    const tl = gsap.timeline();
-
-    // Animate traversal
-    for (let i = 0; i <= indexToRemove; i++) {
-        tl.to(nodes[i], {
-            scale: 1.1,
-            duration: 0.25,
-            ease: 'power1.inOut',
-            onStart: () => nodes[i].classList.add('highlight'),
-            onReverseComplete: () => nodes[i].classList.remove('highlight')
-        });
-        tl.to(nodes[i], {
-            scale: 1,
-            duration: 0.15,
-            ease: 'power1.inOut',
-            onComplete: () => nodes[i].classList.remove('highlight')
-        }, ">-0.05");
-    }
-
-    // Animate removal
-    const nodeToRemove = nodes[indexToRemove];
-    if (nodeToRemove) {
-        tl.to(nodeToRemove, {
-            scale: 1.3,
-            duration: 0.2,
-            ease: "power1.in"
-        });
-        tl.to(nodeToRemove, {
-            y: 60,
-            opacity: 0,
-            duration: 0.5,
-            ease: "power1.in"
-        }, ">-0.1");
-    }
-
-    // Animate shift left for remaining nodes/arrows
-    if (nodes.length > indexToRemove + 1) {
-        tl.to(nodes.slice(indexToRemove + 1), {
-            x: 0,
-            duration: 0.4,
-            ease: "power2.inOut"
-        }, "<");
-    }
-    if (arrows.length > indexToRemove) {
-        tl.to(arrows.slice(indexToRemove), {
-            x: 0,
-            duration: 0.4,
-            ease: "power2.inOut"
-        }, "<");
-    }
-
-    await tl;
-    resetVisualState(containerRef);
-
-    const newArr = listArr.filter((node, idx) => idx !== indexToRemove);
-    return {
-        success: true,
-        newListArr: newArr,
-        message: `Removed ${value} from the list.`,
-        newHistoryText: `Removed ${value} by value.`
-    };
-};
-
-// Search for value (with animation)
-export const handleSearchForValue = async (containerRef, listArr, value) => {
-    if (!value) {
-        return { message: "Please enter a value to search for!", newHistoryText: "" };
-    }
-    resetVisualState(containerRef);
-
-    const { nodes } = getVisualElements(containerRef);
-    let foundIndex = -1;
-    const tl = gsap.timeline();
-
-    for (let i = 0; i < listArr.length; i++) {
-        const visualNode = nodes[i];
-        tl.to(visualNode, {
-            scale: 1.1,
-            duration: 0.25,
-            ease: 'power1.inOut',
-            onStart: () => visualNode.classList.add('highlight'),
-            onReverseComplete: () => visualNode.classList.remove('highlight')
-        });
-        tl.to(visualNode, {
-            scale: 1,
-            duration: 0.15,
-            ease: 'power1.inOut',
-            onComplete: () => visualNode.classList.remove('highlight')
-        }, ">-0.05");
-
-        if (listArr[i].value.toString() === value.toString()) {
-            foundIndex = i;
-            tl.to(visualNode, {
-                scale: 1.3,
-                duration: 0.3,
-                ease: 'power2.out',
-                onStart: () => visualNode.classList.add('highlight')
+        
+        if (currentNode.next !== null) {
+            const arrowElement = document.createElement('div');
+            arrowElement.classList.add('arrow');
+            arrowElement.dataset.index = index;
+            listVisArea.appendChild(arrowElement);
+            
+            gsap.from(arrowElement, {
+                x: 50,
+                opacity: 0,
+                duration: 0.6,
+                delay: delayTime + 0.2,
+                ease: 'back.out(1.7)'
             });
+        }
+        
+        delayTime += 0.3;
+        currentNode = currentNode.next;
+        index++;
+    }
+}
+
+export function handleInsertAtHead(listVisArea, value, setHistoryList, hisnum) {
+    const newNode = new Node(value);
+    if (linkedList.head === null) {
+        linkedList.head = newNode;
+        linkedList.tail = newNode;
+    } else {
+        newNode.next = linkedList.head;
+        linkedList.head = newNode;
+    }
+    linkedList.size++;
+    setHistoryList(prev => [...prev, { id: hisnum, text: `Inserted ${value} at the head.` }]);
+    renderList(listVisArea);
+}
+
+export function handleInsertAtTail(listVisArea, value, setHistoryList, hisnum) {
+    const newNode = new Node(value);
+    if (linkedList.head === null) {
+        linkedList.head = newNode;
+        linkedList.tail = newNode;
+    } else {
+        linkedList.tail.next = newNode;
+        linkedList.tail = newNode;
+    }
+    linkedList.size++;
+    setHistoryList(prev => [...prev, { id: hisnum, text: `Inserted ${value} at the tail.` }]);
+    renderList(listVisArea);
+}
+
+export async function handleInsertAtPosition(listVisArea, value, position, setHistoryList, hisnum, displayMessage) {
+    if (position === 0) {
+        handleInsertAtHead(listVisArea, value, setHistoryList, hisnum);
+        return;
+    }
+    if (position === linkedList.size) {
+        handleInsertAtTail(listVisArea, value, setHistoryList, hisnum);
+        return;
+    }
+
+    const tl = gsap.timeline();
+    const allNodes = listVisArea.querySelectorAll('.node');
+    const allArrows = listVisArea.querySelectorAll('.arrow');
+
+    const nodeAtPosition = allNodes[position];
+    const prevNode = allNodes[position - 1];
+    let targetLeft = 0;
+    let targetTop = 0;
+    if (nodeAtPosition) {
+        targetLeft = nodeAtPosition.offsetLeft;
+        targetTop = nodeAtPosition.offsetTop;
+    } else if (prevNode) {
+        targetLeft = prevNode.offsetLeft + prevNode.offsetWidth + 20;
+        targetTop = prevNode.offsetTop;
+    }
+    
+    const newNodeVisual = document.createElement('div');
+    newNodeVisual.classList.add('node', 'temporary');
+    newNodeVisual.style.position = 'absolute';
+    newNodeVisual.style.left = targetLeft + 'px';
+    newNodeVisual.style.top = '-50px';
+    newNodeVisual.style.opacity = '0';
+    newNodeVisual.style.zIndex = '100';
+    newNodeVisual.innerHTML = `<div class=\"node-data\">${value}</div>`;
+    listVisArea.appendChild(newNodeVisual);
+
+    // Step 1: Traverse and highlight up to the insertion point
+    for (let i = 0; i < position; i++) {
+        const visualNode = allNodes[i];
+        await tl.to(visualNode, { duration: 0.5, toggleClass: 'highlight', ease: 'power1.inOut', scale: 1.1 });
+        await tl.to(visualNode, { duration: 0.5, toggleClass: 'highlight', ease: 'power1.inOut', scale: 1 });
+    }
+
+    // Step 2: Shift nodes to make space
+    const elementsToShift = [];
+    for (let i = position; i < allNodes.length; i++) { elementsToShift.push(allNodes[i]); }
+    for (let i = position; i < allArrows.length; i++) { elementsToShift.push(allArrows[i]); }
+    await tl.to(elementsToShift, { x: '+=100', duration: 0.5, ease: "power2.inOut" });
+
+    // Step 3: Animate the new node dropping into position
+    await tl.to(newNodeVisual, {
+        top: targetTop + 'px',
+        left: (targetLeft - 5) + 'px',
+        opacity: 1,
+        duration: 0.8,
+        ease: "back.out(1.7)"
+    });
+
+    // Step 4: Update data structure and re-render
+    const newNodeData = new Node(value);
+    let currentNode = linkedList.head;
+    for (let i = 0; i < position - 1; i++) { currentNode = currentNode.next; }
+    let tempNode = currentNode.next;
+    currentNode.next = newNodeData;
+    newNodeData.next = tempNode;
+    linkedList.size++;
+
+    setHistoryList(prev => [...prev, { id: hisnum, text: `Inserted ${value} at position ${position}.` }]);
+    renderList(listVisArea);
+}
+
+export function handleRemoveFromHead(listVisArea, setHistoryList, hisnum) {
+    const removedValue = linkedList.head.data;
+    linkedList.head = linkedList.head.next;
+    linkedList.size--;
+    if (linkedList.head === null) {
+        linkedList.tail = null;
+    }
+    setHistoryList(prev => [...prev, { id: hisnum, text: `Removed ${removedValue} from the head.` }]);
+    renderList(listVisArea);
+}
+
+export function handleRemoveFromTail(listVisArea, setHistoryList, hisnum) {
+    if (linkedList.head === linkedList.tail) {
+        const removedValue = linkedList.head.data;
+        linkedList.head = null;
+        linkedList.tail = null;
+        linkedList.size--;
+        setHistoryList(prev => [...prev, { id: hisnum, text: `Removed ${removedValue} from the tail.` }]);
+        renderList(listVisArea);
+        return;
+    }
+    
+    let currentNode = linkedList.head;
+    while (currentNode.next !== linkedList.tail) {
+        currentNode = currentNode.next;
+    }
+    const removedValue = linkedList.tail.data;
+    currentNode.next = null;
+    linkedList.tail = currentNode;
+    linkedList.size--;
+    
+    setHistoryList(prev => [...prev, { id: hisnum, text: `Removed ${removedValue} from the tail.` }]);
+    renderList(listVisArea);
+}
+
+export async function handleRemoveByValue(listVisArea, value, setHistoryList, hisnum, displayMessage) {
+    if (linkedList.head === null || !value) { return; }
+
+    const tl = gsap.timeline();
+    const allNodes = listVisArea.querySelectorAll('.node');
+    let currentNode = linkedList.head;
+    let count = 0;
+    let found = false;
+
+    while (currentNode !== null) {
+        const visualNode = allNodes[count];
+        await tl.to(visualNode, { duration: 0.5, toggleClass: 'highlight', ease: 'power1.inOut', scale: 1.1 });
+
+        if (currentNode.data == value) {
+            found = true;
+            await tl.to(visualNode, { duration: 0.5, scale: 1.3, ease: 'power2.out' });
+            await tl.to(visualNode, { duration: 0.8, y: 100, opacity: 0, ease: "power1.in" });
             break;
         }
+        await tl.to(visualNode, { duration: 0.5, toggleClass: 'highlight', ease: 'power1.inOut', scale: 1 });
+        currentNode = currentNode.next;
+        count++;
     }
 
-    await tl;
-    resetVisualState(containerRef);
-
-    if (foundIndex !== -1) {
-        return {
-            message: `Found value ${value} at index ${foundIndex}.`,
-            newHistoryText: `Searched for value ${value}.`
-        };
+    if (found) {
+        let currentNode = linkedList.head;
+        if (currentNode.data == value) {
+            handleRemoveFromHead(listVisArea, setHistoryList, hisnum);
+            return;
+        }
+        let prevNode = null;
+        while (currentNode !== null && currentNode.data != value) {
+            prevNode = currentNode;
+            currentNode = currentNode.next;
+        }
+        if (currentNode === linkedList.tail) {
+            handleRemoveFromTail(listVisArea, setHistoryList, hisnum);
+            return;
+        }
+        if (currentNode) {
+            prevNode.next = currentNode.next;
+            linkedList.size--;
+        }
+        setHistoryList(prev => [...prev, { id: hisnum, text: `Deleted ${value} from linked list.` }]);
     } else {
-        return {
-            message: `Value ${value} not found.`,
-            newHistoryText: `Searched for value ${value}.`
-        };
+        displayMessage(`Value ${value} not found in the list.`);
     }
-};
+    renderList(listVisArea);
+}
+
+export async function handleSearchForValue(listVisArea, value, setHistoryList, hisnum, displayMessage) {
+    const allNodes = listVisArea.querySelectorAll('.node');
+    allNodes.forEach(node => node.classList.remove('highlight'));
+    let currentNode = linkedList.head;
+    let count = 0;
+    let found = false;
+
+    const tl = gsap.timeline();
+
+    while (currentNode !== null) {
+        const visualNode = allNodes[count];
+        await tl.to(visualNode, { duration: 0.5, toggleClass: 'highlight', ease: 'power1.inOut', scale: 1.1 });
+
+        if (currentNode.data == value) {
+            found = true;
+            await tl.to(visualNode, { duration: 0.5, scale: 1.3, ease: 'power2.out' })
+                    .to(visualNode, { duration: 0.5, toggleClass: 'highlight', ease: 'power1.inOut', scale: 1 });
+            break;
+        }
+        await tl.to(visualNode, { duration: 0.5, toggleClass: 'highlight', ease: 'power1.inOut', scale: 1 });
+        currentNode = currentNode.next;
+        count++;
+    }
+
+    if (found) {
+        displayMessage(`Found value ${value} at index ${count}.`);
+    } else {
+        displayMessage(`Value ${value} not found in the list.`);
+    }
+    setHistoryList(prev => [...prev, { id: hisnum, text: `Searched for value ${value}.` }]);
+}
