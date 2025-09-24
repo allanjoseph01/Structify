@@ -30,7 +30,7 @@ function renderList(listVisArea) {
     if (linkedList.head === null) {
         const placeholderText = document.createElement('p');
         placeholderText.classList.add('text-gray-400', 'italic', 'text-base');
-        placeholderText.textContent = 'Your Singly Linked List will appear here 👇';
+        placeholderText.textContent = '';
         listVisArea.appendChild(placeholderText);
         return;
     }

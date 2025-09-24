@@ -29,7 +29,7 @@ function renderDoublyLinkedList(dllVisArea) {
     if (dll.head === null) {
         const placeholderText = document.createElement('p');
         placeholderText.classList.add('text-gray-400', 'italic', 'text-base');
-        placeholderText.textContent = 'Your Doubly Linked List will appear here 👇';
+        placeholderText.textContent = '';
         dllVisArea.appendChild(placeholderText);
     } else {
         while (currentNode !== null) {

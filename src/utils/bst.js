@@ -98,7 +98,7 @@ export function renderTree(bstVisArea, root = binarySearchTree.root) {
     if (!root) {
         const placeholderText = document.createElement('p');
         placeholderText.classList.add('text-gray-400', 'italic', 'text-base');
-        placeholderText.textContent = 'Your Binary Search Tree will appear here 👇';
+        placeholderText.textContent = '';
         bstVisArea.appendChild(placeholderText);
         return;
     }
