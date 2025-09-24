@@ -3,8 +3,8 @@ import Navbar from '../components/Navbar';
 import ReactMarkdown from 'react-markdown';
 
 // Constants for the chatbot API
-const GEMINI_API_KEY = "AIzaSyB9oSzWy42FgAtZmJG4whaqHFcLxZzfbF8";
-const MODEL_NAME = "gemini-2.5-flash";
+const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
+const MODEL_NAME = import.meta.env.VITE_GEMINI_MODEL;
 
 const systemInstructionText = `You are Structify-AI, a highly specialized AI assistant for a data structure visualization tool. Your primary role is to act as a coding instructor for a single, specific data structure. Your knowledge is strictly limited to this data structure. Always use headings and avoid nested lists. For lists, write each item as a single paragraph. Do not use sub-items or indentation. The response must be easy for my program to render.
 
