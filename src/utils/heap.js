@@ -173,8 +173,8 @@ async function heapifyUp(heapvisArea) {
         if (curEl && parEl) {
             // Highlight nodes being compared
             await Promise.all([
-                tweenTo(curEl, { scale: 1.2, duration: 0.2, backgroundColor: '#00D3F3', color: '#0A1018' }),
-                tweenTo(parEl, { scale: 1.2, duration: 0.2, backgroundColor: '#00D3F3', color: '#0A1018' })
+                tweenTo(curEl, { scale: 1.2, duration: 0.3, backgroundColor: '#00D3F3', color: '#0A1018' }),
+                tweenTo(parEl, { scale: 1.2, duration: 0.3, backgroundColor: '#00D3F3', color: '#0A1018' })
             ]);
         }
 
@@ -186,12 +186,12 @@ async function heapifyUp(heapvisArea) {
         if (curEl && parEl) {
             // Revert highlight after comparison
             await Promise.all([
-                tweenTo(curEl, { scale: 1, duration: 0.15, backgroundColor: 'rgba(0, 0, 0, 0.6)', color: 'white' }),
-                tweenTo(parEl, { scale: 1, duration: 0.15, backgroundColor: 'rgba(0, 0, 0, 0.6)', color: 'white' })
+                tweenTo(curEl, { scale: 1, duration: 0.3, backgroundColor: 'rgba(0, 0, 0, 0.6)', color: 'white' }),
+                tweenTo(parEl, { scale: 1, duration: 0.3, backgroundColor: 'rgba(0, 0, 0, 0.6)', color: 'white' })
             ]);
         }
     }
-    await tweenTo(document.querySelectorAll('.heap-node'), { scale: 1, duration: 0.15 });
+    await tweenTo(document.querySelectorAll('.heap-node'), { scale: 1, duration: 0.3 });
 }
 
 async function heapifyDown(heapvisArea) {
@@ -206,32 +206,32 @@ async function heapifyDown(heapvisArea) {
         const curEl = getNodeElementByIndex(i);
         
         if (curEl) {
-            await tweenTo(curEl, { scale: 1.2, duration: 0.15, backgroundColor: '#00D3F3', color: '#0A1018' });
+            await tweenTo(curEl, { scale: 1.2, duration: 0.3, backgroundColor: '#00D3F3', color: '#0A1018' });
         }
 
         if (l < n) {
             const lEl = getNodeElementByIndex(l);
             if (lEl) {
-                await tweenTo(lEl, { scale: 1.15, duration: 0.15 });
+                await tweenTo(lEl, { scale: 1.3, duration: 0.3 });
             }
             if (greaterAt(l, largest)) largest = l;
         }
         if (r < n) {
             const rEl = getNodeElementByIndex(r);
             if (rEl) {
-                await tweenTo(rEl, { scale: 1.15, duration: 0.15 });
+                await tweenTo(rEl, { scale: 1.3, duration: 0.3 });
             }
             if (greaterAt(r, largest)) largest = r;
         }
         
-        await tweenTo(document.querySelectorAll('.heap-node'), { scale: 1, duration: 0.15, backgroundColor: 'rgba(0, 0, 0, 0.6)', color: 'white' });
+        await tweenTo(document.querySelectorAll('.heap-node'), { scale: 1, duration: 0.3, backgroundColor: 'rgba(0, 0, 0, 0.6)', color: 'white' });
 
         if (largest !== i) {
             await animateSwap(heapvisArea, i, largest);
             i = largest;
         } else break;
     }
-    await tweenTo(document.querySelectorAll('.heap-node'), { scale: 1, duration: 0.15 });
+    await tweenTo(document.querySelectorAll('.heap-node'), { scale: 1, duration: 0.3 });
 }
 
 /* ---------------- Insert / Extract ---------------- */

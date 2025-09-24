@@ -145,8 +145,8 @@ export async function handleInsertAtPosition(dllVisArea, value, position, setHis
     // Step 1: Traverse and highlight up to the insertion point
     for (let i = 0; i < position; i++) {
         const visualNode = allNodes[i];
-        await tl.to(visualNode, { duration: 0.5, toggleClass: 'highlight', ease: 'power1.inOut', scale: 1.1 });
-        await tl.to(visualNode, { duration: 0.5, toggleClass: 'highlight', ease: 'power1.inOut', scale: 1 });
+        await tl.to(visualNode, { duration: 0.5, toggleClass: 'highlight', ease: 'power1.inOut', scale: 1.2 , backgroundColor:"#00D3F3" , color:"black"});
+        await tl.to(visualNode, { duration: 0.5, toggleClass: 'highlight', ease: 'power1.inOut', scale: 1 , backgroundColor:"#04060A" , color:"white"});
     }
 
     // Step 2: Shift the nodes to make space
@@ -223,15 +223,15 @@ export async function handleRemoveByValue(dllVisArea, value, setHistoryList, his
 
     while (currentNode !== null) {
         const visualNode = allNodes[count];
-        await tl.to(visualNode, { duration: 0.5, toggleClass: 'highlight', ease: 'power1.inOut', scale: 1.1 });
+        await tl.to(visualNode, { duration: 0.5, toggleClass: 'highlight', ease: 'power1.inOut', scale: 1.2 , backgroundColor:"#00D3F3" , color:"black"});
 
         if (currentNode.data == value) {
             found = true;
-            await tl.to(visualNode, { duration: 0.5, scale: 1.3, ease: 'power2.out' });
+            await tl.to(visualNode, { duration: 0.5, scale: 1.4, ease: 'power2.out' });
             await tl.to(visualNode, { duration: 0.8, y: 100, opacity: 0, ease: "power1.in" });
             break;
         }
-        await tl.to(visualNode, { duration: 0.5, toggleClass: 'highlight', ease: 'power1.inOut', scale: 1 });
+        await tl.to(visualNode, { duration: 0.5, toggleClass: 'highlight', ease: 'power1.inOut', scale: 1 , backgroundColor:"#04060A" , color:"white"});
         currentNode = currentNode.next;
         count++;
     }
@@ -276,15 +276,15 @@ export async function handleSearchForValue(dllVisArea, value, setHistoryList, hi
 
     while (currentNode !== null) {
         const visualNode = allNodes[count];
-        await tl.to(visualNode, { duration: 0.5, toggleClass: 'highlight', ease: 'power1.inOut', scale: 1.1 });
+        await tl.to(visualNode, { duration: 0.5, toggleClass: 'highlight', ease: 'power1.inOut', scale: 1.2 , backgroundColor:"#00D3F3" , color:"black"});
 
         if (currentNode.data == value) {
             found = true;
-            await tl.to(visualNode, { duration: 0.5, scale: 1.3, ease: 'power2.out' })
-                    .to(visualNode, { duration: 0.5, toggleClass: 'highlight', ease: 'power1.inOut', scale: 1 });
+            await tl.to(visualNode, { duration: 0.5, scale: 1.4, ease: 'power2.out' })
+                    .to(visualNode, { duration: 0.5, toggleClass: 'highlight', ease: 'power1.inOut', scale: 1 , backgroundColor:"#04060A" , color:"white"});
             break;
         }
-        await tl.to(visualNode, { duration: 0.5, toggleClass: 'highlight', ease: 'power1.inOut', scale: 1 });
+        await tl.to(visualNode, { duration: 0.5, toggleClass: 'highlight', ease: 'power1.inOut', scale: 1 , backgroundColor:"#04060A" , color:"white"});
         currentNode = currentNode.next;
         count++;
     }

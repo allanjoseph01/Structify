@@ -70,10 +70,22 @@ class BinarySearchTree {
 
 export const binarySearchTree = new BinarySearchTree();
 
-// A utility function to animate a visual node.
-const animateNode = (visualNode, tl) => {
-    tl.to(visualNode, { duration: 0.5, scale: 1.3, ease: 'power1.inOut' });
-    tl.to(visualNode, { duration: 0.25, scale: 1, ease: 'power1.inOut' }, '>-0.15');
+// Corrected: Use a more direct animation for highlighting
+const highlightNode = (visualNode, tl) => {
+    tl.to(visualNode, {
+        duration: 0.5,
+        scale: 1.3,
+        backgroundColor: '#ffc400',
+        color: '#0A1018',
+        ease: 'power1.inOut'
+    });
+    tl.to(visualNode, {
+        duration: 0.25,
+        scale: 1,
+        backgroundColor: 'rgba(0,0,0,0.6)',
+        color: 'white',
+        ease: 'power1.inOut'
+    }, '>-0.15'); // Overlap the scale-down with color change
 };
 
 export function renderTree(bstVisArea, root = binarySearchTree.root) {
@@ -86,7 +98,7 @@ export function renderTree(bstVisArea, root = binarySearchTree.root) {
     if (!root) {
         const placeholderText = document.createElement('p');
         placeholderText.classList.add('text-gray-400', 'italic', 'text-base');
-        placeholderText.textContent = '';
+        placeholderText.textContent = 'Your Binary Search Tree will appear here 👇';
         bstVisArea.appendChild(placeholderText);
         return;
     }
@@ -202,7 +214,7 @@ export async function handleInsert(bstVisArea, value, setHistoryList, hisnum, di
         if (rootEl) {
             gsap.from(rootEl, {
                 duration: 0.8,
-                y: -150,
+                y: -100,
                 scale: 0,
                 opacity: 0,
                 ease: 'back.out(1.7)'
@@ -243,7 +255,7 @@ export async function handleInsert(bstVisArea, value, setHistoryList, hisnum, di
     let insertionType = '';
     while (currentNode) {
         const vis = bstVisArea.querySelector(`.bst-node[data-value="${currentNode.value}"]`);
-        if (vis) animateNode(vis, tl);
+        if (vis) highlightNode(vis, tl);
 
         insertionParent = currentNode;
         if (numValue < currentNode.value) {
@@ -313,7 +325,7 @@ export async function handleInsert(bstVisArea, value, setHistoryList, hisnum, di
     tempNodeEl.dataset.value = numValue;
     tempNodeEl.style.position = 'absolute';
     tempNodeEl.style.left = `${targetLeft}px`;
-    tempNodeEl.style.top = `-50px`;
+    tempNodeEl.style.top = `-5px`;
     tempNodeEl.style.scale = 0;
     tempNodeEl.style.opacity = 0;
     bstVisArea.appendChild(tempNodeEl);
@@ -349,7 +361,7 @@ export async function handleDelete(bstVisArea, value, setHistoryList, hisnum, di
     while (current) {
         path.push(current);
         const visualNode = bstVisArea.querySelector(`.bst-node[data-value="${current.value}"]`);
-        if (visualNode) animateNode(visualNode, tl);
+        if (visualNode) highlightNode(visualNode, tl);
         
         if (numValue === current.value) {
             target = current;
@@ -362,6 +374,9 @@ export async function handleDelete(bstVisArea, value, setHistoryList, hisnum, di
     }
     await tl.play();
     tl.clear();
+    
+    const allNodes = bstVisArea.querySelectorAll(`.bst-node`);
+    gsap.to(allNodes, { duration: 0.5, backgroundColor: 'rgba(0,0,0,0.6)', color: 'white', ease: 'power1.inOut' });
 
     if (!target) {
         displayMessage(`Value ${numValue} not found in the tree.`);
@@ -417,12 +432,11 @@ export async function handleSearch(bstVisArea, value, setHistoryList, hisnum, di
     while (currentNode) {
         const visualNode = bstVisArea.querySelector(`.bst-node[data-value="${currentNode.value}"]`);
         if (visualNode) {
-            animateNode(visualNode, tl);
+            highlightNode(visualNode, tl);
         }
 
         if (numValue === currentNode.value) {
             found = true;
-            tl.to(visualNode, { duration: 0.5, scale: 1.5, ease: 'back.out(1.7)', yoyo: true, repeat: 1 });
             break;
         } else if (numValue < currentNode.value) {
             currentNode = currentNode.left;
@@ -430,14 +444,24 @@ export async function handleSearch(bstVisArea, value, setHistoryList, hisnum, di
             currentNode = currentNode.right;
         }
     }
+    
     await tl.play();
     tl.clear();
 
+    const allNodes = bstVisArea.querySelectorAll(`.bst-node`);
+    gsap.to(allNodes, { duration: 0.5, backgroundColor: 'rgba(0,0,0,0.6)', color: 'white', ease: 'power1.inOut' });
+
     if (found) {
+        const visualNode = bstVisArea.querySelector(`.bst-node[data-value="${numValue}"]`);
+        if (visualNode) {
+            gsap.to(visualNode, { duration: 0.5, scale: 1.5, borderColor: '#ffc400', color: '#ffc400', ease: 'back.out(1.7)' });
+            await gsap.to(visualNode, { duration: 0.5, scale: 1, borderColor: '#00D3F3', color: 'white', ease: 'back.out(1.7)' });
+        }
         displayMessage(`Found value ${numValue}.`);
     } else {
         displayMessage(`Value ${numValue} not found in the tree.`);
     }
+    
     setHistoryList(prev => [...prev, { id: hisnum, text: `Searched for value ${numValue}.` }]);
 }
 
@@ -453,7 +477,7 @@ export async function findMaxValue(bstVisArea, setHistoryList, hisnum, displayMe
 
     while (currentNode) {
         const visualNode = bstVisArea.querySelector(`.bst-node[data-value="${currentNode.value}"]`);
-        if (visualNode) animateNode(visualNode, tl);
+        if (visualNode) highlightNode(visualNode, tl);
 
         if (currentNode.right) {
             currentNode = currentNode.right;
@@ -466,12 +490,14 @@ export async function findMaxValue(bstVisArea, setHistoryList, hisnum, displayMe
     await tl.play();
     tl.clear();
 
+    const allNodes = bstVisArea.querySelectorAll(`.bst-node`);
+    gsap.to(allNodes, { duration: 0.5, backgroundColor: 'rgba(0,0,0,0.6)', color: 'white', ease: 'power1.inOut' });
+
     const visualNode = bstVisArea.querySelector(`.bst-node[data-value="${maxValue}"]`);
     if (visualNode) {
-        tl.to(visualNode, { duration: 0.5, scale: 1.5, ease: 'back.out(1.7)', yoyo: true, repeat: 1 });
+        gsap.to(visualNode, { duration: 0.5, scale: 1.5, borderColor: '#ffc400', color: '#ffc400', ease: 'back.out(1.7)' });
+        await gsap.to(visualNode, { duration: 0.5, scale: 1, borderColor: '#00D3F3', color: 'white', ease: 'back.out(1.7)' });
     }
-
-    await tl.play();
     
     displayMessage(`The maximum value in the tree is: ${maxValue}`);
     setHistoryList(prev => [...prev, { id: hisnum, text: `Found maximum value: ${maxValue}.` }]);
@@ -489,7 +515,7 @@ export async function findMinValue(bstVisArea, setHistoryList, hisnum, displayMe
 
     while (currentNode) {
         const visualNode = bstVisArea.querySelector(`.bst-node[data-value="${currentNode.value}"]`);
-        if (visualNode) animateNode(visualNode, tl);
+        if (visualNode) highlightNode(visualNode, tl);
 
         if (currentNode.left) {
             currentNode = currentNode.left;
@@ -501,13 +527,15 @@ export async function findMinValue(bstVisArea, setHistoryList, hisnum, displayMe
 
     await tl.play();
     tl.clear();
+    
+    const allNodes = bstVisArea.querySelectorAll(`.bst-node`);
+    gsap.to(allNodes, { duration: 0.5, backgroundColor: 'rgba(0,0,0,0.6)', color: 'white', ease: 'power1.inOut' });
 
     const visualNode = bstVisArea.querySelector(`.bst-node[data-value="${minValue}"]`);
     if (visualNode) {
-        tl.to(visualNode, { duration: 0.5, scale: 1.5, ease: 'back.out(1.7)', yoyo: true, repeat: 1 });
+        gsap.to(visualNode, { duration: 0.5, scale: 1.5, borderColor: '#ffc400', color: '#ffc400', ease: 'back.out(1.7)' });
+        await gsap.to(visualNode, { duration: 0.5, scale: 1, borderColor: '#00D3F3', color: 'white', ease: 'back.out(1.7)' });
     }
-
-    await tl.play();
 
     displayMessage(`The minimum value in the tree is: ${minValue}`);
     setHistoryList(prev => [...prev, { id: hisnum, text: `Found minimum value: ${minValue}.` }]);
